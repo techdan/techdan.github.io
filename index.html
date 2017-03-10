@@ -22,9 +22,35 @@
     <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" rel="stylesheet" type="text/css">
 	<style>
-		h1, h2, h3, h4, h5, h6 {font-family: inherit;}
-		header, section.success, hr.star-light:after {background:#2f6c91;}
-		section {padding: 75px 0px;}
+		header .intro-text h1.name {
+			font-family: Montserrat,Helvetica,Arial,sans-serif;
+			font-weight: 700;
+			letter-spacing: 1px;
+		}
+		header .intro-text h2.skills {
+			font-size: 26px;
+			line-height: 1.6;
+		}
+		h1, h2, h3, h4, h5, h6 {
+			font-family: Catamaran,Helvetica,Arial,sans-serif;
+			font-weight: 200;
+			letter-spacing: 1px;
+		}
+		header, section.success, hr.star-light:after {
+			background:#2f6c91;
+		}
+		hr.star-primary:after, hr.star-light:after {
+			content: "";
+		}
+		hr.star-primary, hr.star-light {
+			content: "";
+			border-top: solid 2px;
+			margin: 5px auto 25px;
+			max-width: 290px;
+		}
+		section {
+			padding: 75px 0px;
+		}
 		.floating-label-form-group input
 		{
 			padding: 20px 12px;
@@ -121,7 +147,11 @@
                     <div class="intro-text">
                         <h1 class="name">Manheim Consulting</h1>
                         <hr class="star-light">
-                        <h1 class="skills">Software Expert Witness and Patent Litigation Technical Experts</h1>
+                        <h2 class="skills">
+							Software Expert Witnesses
+							<BR>						
+							Patent Litigation Technical Experts
+						</h2>
                     </div>
                 </div>
             </div>
@@ -186,7 +216,7 @@
                     <p>Manheim Consulting provides software expertise for technical legal matters. We understand the patent litigation process and help translate complex technical subjects into powerful legal arguments.</p>
                 </div>
                 <div class="col-lg-4">
-                    <p>After supporting over 40 cases and providing source code analysis on over 100 proprietary systems, we understand the intellectual property litigation process, so we work efficiently to identify the critical technical issues to support patent infringement disputes.</p>
+                    <p>After supporting over 40 cases and providing source code analysis on over 100 proprietary systems, we have developed optimized analytical tools to efficiently  identify the critical technical issues and support patent infringement disputes.</p>
                 </div>
                 <!--<div class="col-lg-8 col-lg-offset-2 text-center">
                     <a href="#" class="btn btn-lg btn-outline">
