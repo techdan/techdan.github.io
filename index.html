@@ -22,8 +22,51 @@
     <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" rel="stylesheet" type="text/css">
 	<style>
-		.img-responsive {max-width:250px;}
-	
+		h1, h2, h3, h4, h5, h6 {font-family: inherit;}
+		header, section.success, hr.star-light:after {background:#2f6c91;}
+		section {padding: 75px 0px;}
+		.floating-label-form-group input
+		{
+			padding: 20px 12px;
+			border: 1px solid #ccc;
+		}
+		.floating-label-form-group textarea {
+			padding: 6px 12px;
+			border: 1px solid #ccc;
+		}
+		.img-responsive {max-width:323px;}
+		#portfolio .portfolio-item {
+			height: 124px;
+		}
+		#portfolio .portfolio-item > .portfolio-item {
+			background-repeat: no-repeat;
+			text-indent: -9999px;
+			position: absolute;
+			top: 0;
+			right: 0;
+			width: 250px;
+			margin: 0px 37px;
+			background-size: contain;
+			background-position: center center;
+		}
+		.logoirell {
+			background-image: url("img/Logos/Irell logo.png"); 
+		}
+		.logofoley {
+			background-image: url("img/Logos/Foley-and-Lardner.jpg"); 
+		}
+		.logodovel {
+			background-image: url("img/Logos/dovel logo.jpg"); 
+		}
+		.logobaker {
+			background-image: url("img/Logos/Baker McKenzie Logo.jpg"); 
+		}
+		.logosusman {
+			background-image: url("img/Logos/susman godfrey.png"); 
+		}
+		.logorak {
+			background-image: url("img/Logos/RAK Logo Lg.png"); 
+		}
 	</style>
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -76,7 +119,7 @@
                 <div class="col-lg-12">
                     <!-- <img class="img-responsive" src="img/profile.png" alt=""> -->
                     <div class="intro-text">
-                        <span class="name">Manheim Consulting</span>
+                        <h1 class="name">Manheim Consulting</h1>
                         <hr class="star-light">
                         <h1 class="skills">Software Expert Witness and Patent Litigation Technical Experts</h1>
                     </div>
@@ -96,25 +139,26 @@
             </div>
             <div class="row">
                 <div class="col-sm-4 portfolio-item">
-                    <img src="img/Logos/Irell logo.png" class="img-responsive portfolio-item" alt="">
-                </div>
-                <div class="center-block col-sm-4 portfolio-item">
-					<img src="img/Logos/Foley-and-Lardner.jpg" class="center-block img-responsive portfolio-item" alt="">
+                    <div class="logobaker img-responsive portfolio-item">Baker & McKenzie</div>
                 </div>
                 <div class="col-sm-4 portfolio-item">
-					<img src="img/Logos/dovel logo.jpg" class="img-responsive portfolio-item" alt="">
+                    <div class="logosusman img-responsive portfolio-item">Susman Godfrey LLP</div>
                 </div>
-			</div>
+                <div class="col-sm-4 portfolio-item">
+                    <div class="logorak img-responsive portfolio-item">Russ August & Kabat</div>
+                </div>
+            </div>
             <div class="row">
                 <div class="col-sm-4 portfolio-item">
-                    <img src="img/Logos/Baker McKenzie Logo.jpg" class="img-responsive portfolio-item" alt="">
+                    <div class="logoirell img-responsive portfolio-item">Irell & Manella LLP</div>
                 </div>
                 <div class="col-sm-4 portfolio-item">
-                    <img src="img/Logos/susman godfrey.png" class="img-responsive portfolio-item" alt="">
+					<div class="logofoley img-responsive portfolio-item">Foley & Lardner LLP</div>
                 </div>
                 <div class="col-sm-4 portfolio-item">
-                    <img src="img/Logos/RAK Logo Lg.png" class="img-responsive portfolio-item" alt="">
+					<div class="logodovel img-responsive portfolio-item">Dovel & Luner</div>
                 </div>
+			</div>
                 <!--<div class="col-sm-4 portfolio-item">
                     <a href="#portfolioModal6" class="portfolio-link" data-toggle="modal">
                         <div class="caption">
@@ -125,7 +169,6 @@
                         <img src="img/portfolio/submarine.png" class="img-responsive" alt="">
                     </a>
                 </div>-->
-            </div>
         </div>
     </section>
 
@@ -220,10 +263,10 @@
                         <h3>Around the Web</h3>
                         <ul class="list-inline">
                             <li>
-                                <a href="www.twitter.com/techdan" class="btn-social btn-outline"><i class="fa fa-fw fa-twitter"></i></a>
+                                <a href="http://www.twitter.com/techdan" class="btn-social btn-outline"><i class="fa fa-fw fa-twitter"></i></a>
                             </li>
                             <li>
-                                <a href="www.linkedin.com/in/danmanheim" class="btn-social btn-outline"><i class="fa fa-fw fa-linkedin"></i></a>
+                                <a href="http://www.linkedin.com/in/danmanheim" class="btn-social btn-outline"><i class="fa fa-fw fa-linkedin"></i></a>
                             </li>
                         </ul>
                     </div>
