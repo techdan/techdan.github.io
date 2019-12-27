@@ -21,7 +21,7 @@ $(function() {
                 firstName = name.split(' ').slice(0, -1).join(' ');
             }
             $.ajax({
-                url: "https://enformed.io/1um71wa6/",
+                url: "https://www.enformed.io/1um71wa6/",
                 method: "POST",
                 data: {
                     name: name,
