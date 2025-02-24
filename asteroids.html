@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Asteroids Clone - Three.js</title>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        #gameContainer { position: relative; width: 100%; height: 100vh; }
+        #gameOver, #mainMenu {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            z-index: 10;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            display: none;
+        }
+        #mainMenu { display: block; }
+        #score, #health, #ammo {
+            position: absolute;
+            color: white;
+            font-family: Arial, sans-serif;
+            z-index: 10;
+        }
+        #score { top: 10px; left: 10px; }
+        #health { top: 30px; left: 10px; }
+        #ammo { top: 50px; left: 10px; }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background: #fff;
+            border: none;
+            border-radius: 5px;
+        }
+        button:hover { background: #ddd; }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <div id="mainMenu">
+            <h1>Asteroids</h1>
+            <button id="playButton">Play Game</button>
+        </div>
+        <div id="gameOver">
+            <h1>Game Over</h1>
+            <p>Score: <span id="finalScore"></span></p>
+            <p>Press R to Restart</p>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <script>
+        // Three.js setup
+        const container = document.getElementById('gameContainer');
+        const scene = new THREE.Scene();
+        const camera = new THREE.OrthographicCamera(
+            -window.innerWidth / 2, window.innerWidth / 2,
+            window.innerHeight / 2, -window.innerHeight / 2,
+            1, 1000
+        );
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        container.appendChild(renderer.domElement);
+
+        // Game state
+        let score = 0;
+        let health = 100;
+        let ammo = 100;
+        let gameOver = false;
+        let gameStarted = false;
+        let paused = false;
+        const gameOverScreen = document.getElementById('gameOver');
+        const mainMenuScreen = document.getElementById('mainMenu');
+        const finalScoreElement = document.getElementById('finalScore');
+        document.getElementById('playButton').addEventListener('click', startGame);
+
+        // Ship
+        const shipGeometry = new THREE.BufferGeometry();
+        const shipVertices = new Float32Array([15, 0, 0, -15, 7.5, 0, -15, -7.5, 0]);
+        shipGeometry.setAttribute('position', new THREE.BufferAttribute(shipVertices, 3));
+        const shipMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        const ship = new THREE.Mesh(shipGeometry, shipMaterial);
+        ship.position.set(0, 0, 0);
+
+        // Game objects
+        let asteroids = [];
+        let bullets = [];
+        let trails = [];
+        let powerUps = [];
+        const INITIAL_ASTEROID_COUNT = 5;
+        const INITIAL_ASTEROID_SIZE = 30;
+        const BULLET_SPEED = 7;
+        const BULLET_LIFE = 120; // Updated to 120
+        let shootCooldownMax = 10;
+        let tripleShot = false;
+        let tripleShotTimer = 0;
+
+        // Controls
+        let keys = { w: false, a: false, s: false, d: false, space: false, r: false, p: false };
+        let shipSpeed = 0;
+        let shipDx = 0;
+        let shipDy = 0;
+        const MAX_SPEED = 5;
+
+        // Event listeners
+        document.addEventListener('keydown', (e) => {
+            switch(e.key.toLowerCase()) {
+                case 'w': keys.w = true; break;
+                case 'a': keys.a = true; break;
+                case 's': keys.s = true; break;
+                case 'd': keys.d = true; break;
+                case ' ': keys.space = true; break;
+                case 'r': if (gameOver) keys.r = true; break;
+                case 'p': 
+                    if (!gameStarted) startGame();
+                    else {
+                        keys.p = true;
+                        paused = !paused;
+                    }
+                    break;
+            }
+        });
+        document.addEventListener('keyup', (e) => {
+            switch(e.key.toLowerCase()) {
+                case 'w': keys.w = false; break;
+                case 'a': keys.a = false; break;
+                case 's': keys.s = false; break;
+                case 'd': keys.d = false; break;
+                case ' ': keys.space = false; break;
+                case 'r': keys.r = false; break;
+                case 'p': keys.p = false; break;
+            }
+        });
+
+        // Trail creation
+        function createTrail(x, y, color = 0xffffff, size = 5, life = 30) {
+            const geometry = new THREE.CircleGeometry(size, 8);
+            const material = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.5 });
+            const trail = new THREE.Mesh(geometry, material);
+            trail.position.set(x, y, 0);
+            trail.userData = { life };
+            scene.add(trail);
+            trails.push(trail);
+        }
+
+        // Create asteroid
+        function createAsteroid(x, y, size) {
+            const sides = Math.floor(Math.random() * 6) + 5;
+            const geometry = new THREE.BufferGeometry();
+            const vertices = [];
+            for (let i = 0; i < sides; i++) {
+                const angle = (i / sides) * Math.PI * 2;
+                vertices.push(Math.cos(angle) * size, Math.sin(angle) * size, 0);
+            }
+            vertices.push(vertices[0], vertices[1], vertices[2]);
+            geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+            const material = new THREE.LineBasicMaterial({ color: 0xffffff });
+            const asteroid = new THREE.LineLoop(geometry, material);
+            asteroid.position.set(x, y, 0);
+            asteroid.userData = {
+                r: size,
+                dx: (Math.random() - 0.5) * 4,
+                dy: (Math.random() - 0.5) * 4
+            };
+            scene.add(asteroid);
+            return asteroid;
+        }
+
+        // Initial asteroids
+        function createAsteroids() {
+            asteroids = [];
+            for (let i = 0; i < INITIAL_ASTEROID_COUNT; i++) {
+                let x, y, dist;
+                do {
+                    x = (Math.random() - 0.5) * window.innerWidth;
+                    y = (Math.random() - 0.5) * window.innerHeight;
+                    dist = Math.sqrt(x * x + y * y);
+                } while (dist < 100);
+                asteroids.push(createAsteroid(x, y, INITIAL_ASTEROID_SIZE));
+            }
+        }
+
+        // Bullet
+        function createBullet(angleOffset = 0) {
+            if (ammo <= 0) return;
+            const geometry = new THREE.CircleGeometry(2, 8);
+            const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+            const bullet = new THREE.Mesh(geometry, material);
+            const angle = ship.rotation.z + angleOffset;
+            bullet.position.set(
+                ship.position.x + Math.cos(angle) * 15,
+                ship.position.y + Math.sin(angle) * 15,
+                0
+            );
+            bullet.userData = {
+                dx: Math.cos(angle) * BULLET_SPEED + shipDx,
+                dy: Math.sin(angle) * BULLET_SPEED + shipDy,
+                life: BULLET_LIFE
+            };
+            scene.add(bullet);
+            bullets.push(bullet);
+            ammo--;
+        }
+
+        // Power-up
+        function createPowerUp() {
+            const types = ['health', 'fireRate', 'ammo', 'tripleShot'];
+            const type = types[Math.floor(Math.random() * types.length)];
+            const geometry = new THREE.CircleGeometry(20, 8);
+            const material = new THREE.MeshBasicMaterial({ 
+                color: type === 'health' ? 0x00ff00 : 
+                       type === 'fireRate' ? 0xffff00 : 
+                       type === 'ammo' ? 0xff0000 : 0x0000ff
+            });
+            const powerUp = new THREE.Mesh(geometry, material);
+            powerUp.position.set(
+                (Math.random() - 0.5) * window.innerWidth,
+                (Math.random() - 0.5) * window.innerHeight,
+                0
+            );
+            powerUp.userData = { type, life: 1200 };
+            scene.add(powerUp);
+            powerUps.push(powerUp);
+        }
+
+        // Split asteroid
+        function splitAsteroid(asteroid, index) {
+            scene.remove(asteroid);
+            asteroids.splice(index, 1);
+            if (asteroid.userData.r > 10) {
+                asteroids.push(createAsteroid(asteroid.position.x, asteroid.position.y, asteroid.userData.r / 2));
+                asteroids.push(createAsteroid(asteroid.position.x, asteroid.position.y, asteroid.userData.r / 2));
+            }
+            score += Math.floor(10 * (INITIAL_ASTEROID_SIZE / asteroid.userData.r));
+        }
+
+        // Distance calculation
+        function distance(x1, y1, x2, y2) {
+            return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+        }
+
+        // Collision detection
+        function checkCollisions() {
+            if (gameOver || !gameStarted || paused) return;
+
+            for (let i = bullets.length - 1; i >= 0; i--) {
+                const bullet = bullets[i];
+                for (let j = asteroids.length - 1; j >= 0; j--) {
+                    const asteroid = asteroids[j];
+                    if (distance(bullet.position.x, bullet.position.y, 
+                               asteroid.position.x, asteroid.position.y) < asteroid.userData.r) {
+                        scene.remove(bullet);
+                        bullets.splice(i, 1);
+                        splitAsteroid(asteroid, j);
+                        break;
+                    }
+                }
+            }
+
+            for (let i = 0; i < asteroids.length; i++) {
+                const asteroid = asteroids[i];
+                if (distance(ship.position.x, ship.position.y, 
+                           asteroid.position.x, asteroid.position.y) < 15 + asteroid.userData.r) {
+                    const damage = asteroid.userData.r >= INITIAL_ASTEROID_SIZE ? 100 :
+                                 asteroid.userData.r >= INITIAL_ASTEROID_SIZE / 2 ? 50 : 25;
+                    health = Math.max(0, health - damage);
+                    scene.remove(asteroid);
+                    asteroids.splice(i, 1);
+                    if (health <= 0) {
+                        gameOver = true;
+                        gameOverScreen.style.display = 'block';
+                        finalScoreElement.textContent = score;
+                    }
+                    break;
+                }
+            }
+
+            for (let i = powerUps.length - 1; i >= 0; i--) {
+                const powerUp = powerUps[i];
+                if (distance(ship.position.x, ship.position.y, 
+                           powerUp.position.x, powerUp.position.y) < 15 + 20) {
+                    switch (powerUp.userData.type) {
+                        case 'health': health = Math.min(100, health + 25); break;
+                        case 'fireRate': shootCooldownMax = Math.max(2, shootCooldownMax - 2); break;
+                        case 'ammo': ammo += 50; break;
+                        case 'tripleShot': tripleShot = true; tripleShotTimer = 600; break;
+                    }
+                    scene.remove(powerUp);
+                    powerUps.splice(i, 1);
+                }
+            }
+        }
+
+        // Reset game
+        function resetGame() {
+            ship.position.set(0, 0, 0);
+            ship.rotation.z = 0;
+            shipDx = 0;
+            shipDy = 0;
+            shipSpeed = 0;
+            health = 100;
+            ammo = 100;
+            tripleShot = false;
+            tripleShotTimer = 0;
+            bullets.forEach(b => scene.remove(b));
+            asteroids.forEach(a => scene.remove(a));
+            trails.forEach(t => scene.remove(t));
+            powerUps.forEach(p => scene.remove(p));
+            bullets = [];
+            trails = [];
+            powerUps = [];
+            createAsteroids();
+            score = 0;
+            shootCooldownMax = 10;
+            gameOver = false;
+            paused = false;
+            gameStarted = true;
+            gameOverScreen.style.display = 'none';
+            scene.add(ship);
+        }
+
+        // Start game
+        function startGame() {
+            if (!gameStarted) {
+                resetGame();
+                mainMenuScreen.style.display = 'none';
+            }
+            gameStarted = true;
+            paused = false;
+        }
+
+        // Shooting cooldown
+        let shootCooldown = 0;
+        let powerUpTimer = 0;
+
+        // Screen wrapping
+        function wrapAround(object, radius = 0) {
+            const halfWidth = window.innerWidth / 2;
+            const halfHeight = window.innerHeight / 2;
+            if (object.position.x > halfWidth + radius) object.position.x = -halfWidth - radius;
+            if (object.position.x < -halfWidth - radius) object.position.x = halfWidth + radius;
+            if (object.position.y > halfHeight + radius) object.position.y = -halfHeight - radius;
+            if (object.position.y < -halfHeight - radius) object.position.y = halfHeight + radius;
+        }
+
+        // Game loop
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (!gameStarted) {
+                renderer.render(scene, camera);
+                return;
+            }
+
+            if (gameOver) {
+                if (keys.r) resetGame();
+                renderer.render(scene, camera);
+                return;
+            }
+
+            if (paused) {
+                renderer.render(scene, camera);
+                return;
+            }
+
+            // Ship movement
+            if (keys.a) ship.rotation.z += 0.05;
+            if (keys.d) ship.rotation.z -= 0.05;
+            if (keys.w) {
+                shipSpeed = Math.min(MAX_SPEED, shipSpeed + 0.1);
+                shipDx = Math.cos(ship.rotation.z) * shipSpeed;
+                shipDy = Math.sin(ship.rotation.z) * shipSpeed;
+            } else {
+                shipSpeed *= 0.98;
+                shipDx *= 0.98;
+                shipDy *= 0.98;
+            }
+
+            const oldShipX = ship.position.x;
+            const oldShipY = ship.position.y;
+            ship.position.x += shipDx;
+            ship.position.y += shipDy;
+            wrapAround(ship, 15);
+            if (Math.abs(ship.position.x - oldShipX) > 1 || Math.abs(ship.position.y - oldShipY) > 1) {
+                createTrail(oldShipX, oldShipY, 0xffffff, 5);
+            }
+
+            // Asteroid movement
+            asteroids.forEach(asteroid => {
+                const oldX = asteroid.position.x;
+                const oldY = asteroid.position.y;
+                asteroid.position.x += asteroid.userData.dx;
+                asteroid.position.y += asteroid.userData.dy;
+                wrapAround(asteroid, asteroid.userData.r);
+                if (Math.abs(asteroid.position.x - oldX) > 1 || Math.abs(asteroid.position.y - oldY) > 1) {
+                    createTrail(oldX, oldY, 0xaaaaaa, asteroid.userData.r / 3, 20);
+                }
+            });
+
+            // Bullet handling
+            if (keys.space && shootCooldown <= 0 && ammo > 0) {
+                if (tripleShot) {
+                    createBullet(-0.2);
+                    createBullet(0);
+                    createBullet(0.2);
+                } else {
+                    createBullet();
+                }
+                shootCooldown = shootCooldownMax;
+            }
+            if (shootCooldown > 0) shootCooldown--;
+
+            bullets.forEach((bullet, index) => {
+                bullet.position.x += bullet.userData.dx;
+                bullet.position.y += bullet.userData.dy;
+                bullet.userData.life--;
+                if (bullet.userData.life <= 0) {
+                    scene.remove(bullet);
+                    bullets.splice(index, 1);
+                } else {
+                    wrapAround(bullet, 2);
+                }
+            });
+
+            // Trail handling
+            trails.forEach((trail, index) => {
+                trail.userData.life--;
+                trail.material.opacity = trail.userData.life / 30 * 0.5;
+                if (trail.userData.life <= 0) {
+                    scene.remove(trail);
+                    trails.splice(index, 1);
+                }
+            });
+
+            // Power-up spawning
+            powerUpTimer++;
+            if (powerUpTimer >= 600 && powerUps.length < 2) {
+                createPowerUp();
+                powerUpTimer = 0;
+            }
+            powerUps.forEach((powerUp, index) => {
+                powerUp.userData.life--;
+                if (powerUp.userData.life <= 0) {
+                    scene.remove(powerUp);
+                    powerUps.splice(index, 1);
+                }
+            });
+
+            // Triple shot timer
+            if (tripleShot) {
+                tripleShotTimer--;
+                if (tripleShotTimer <= 0) tripleShot = false;
+            }
+
+            // UI
+            if (!document.getElementById('score') && gameStarted) {
+                container.appendChild(Object.assign(document.createElement('div'), { id: 'score' }));
+                container.appendChild(Object.assign(document.createElement('div'), { id: 'health' }));
+                container.appendChild(Object.assign(document.createElement('div'), { id: 'ammo' }));
+            }
+            if (gameStarted) {
+                document.getElementById('score').textContent = `Score: ${score}`;
+                document.getElementById('health').textContent = `Health: ${health}`;
+                document.getElementById('ammo').textContent = `Ammo: ${ammo}`;
+            }
+
+            checkCollisions();
+            renderer.render(scene, camera);
+        }
+
+        // Initial setup
+        camera.position.z = 500;
+        animate();
+
+        // Window resize handling
+        window.addEventListener('resize', () => {
+            camera.left = -window.innerWidth / 2;
+            camera.right = window.innerWidth / 2;
+            camera.top = window.innerHeight / 2;
+            camera.bottom = -window.innerHeight / 2;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
