@@ -1,0 +1,10 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+This is a website for my business, Manheim Consulting
+It is currently hosted on Github pages as a static HTML site
+
+
+After each code update, run the scripts/build.bat script to rebuild the site so it works on the static site.
