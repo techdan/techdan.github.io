@@ -1,2 +1,5 @@
 node_modules
-scripts/
+dist/
+scripts/*
+!scripts/build.bat
+!scripts/build-static.mjs
