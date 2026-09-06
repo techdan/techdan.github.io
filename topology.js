@@ -8,7 +8,6 @@ export function mountTerrain(host) {
   const markerTitle = marker.querySelector('strong');
   const markerDetail = marker.querySelector('small');
   const announcement = figure.querySelector('.terrain-status');
-  const hint = figure.querySelector('.terrain-hint');
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const finePointer = window.matchMedia('(pointer: fine)');
   const scene = new THREE.Scene();
@@ -306,7 +305,6 @@ export function mountTerrain(host) {
     host.setAttribute('role', 'button');
     host.setAttribute('tabindex', '0');
     host.setAttribute('aria-label', 'Interactive terrain. Move to send ripples through the surface. Click or press Enter to reveal an illustrative evidence trace. Escape clears the trace.');
-    hint.textContent = finePointer.matches ? 'Move to stir · Click to trace' : 'Tap the landscape to trace';
     figure.classList.add('is-live');
   }
   resize();

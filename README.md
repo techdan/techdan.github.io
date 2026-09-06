@@ -19,6 +19,14 @@ npm run build
 
 The production build writes a separate `dist/` directory. The existing GitHub Pages workflow can continue serving the repository root; both outputs include the canonical domain, robots.txt, and sitemap.xml. No deployment is performed by these commands.
 
+## Publishing
+
+The public domain is hosted by the existing **Cloudflare Pages** project `manheim-consulting` (`manheim-consulting.pages.dev`). Both `manheimconsultingexperts.com` and `www.manheimconsultingexperts.com` point to that project. It currently uses direct uploads with no Git connection, so pushing to GitHub does **not** update the public domain, even when the separate GitHub Pages build succeeds.
+
+To publish, run `npm test` and `npm run build`, then upload the contents of `dist/` to the existing Cloudflare Pages project using **Create deployment → Production**. A ZIP must contain `index.html` and `assets/` at its root, not an enclosing `dist/` folder. Select **Save and deploy**, then verify the public domain, contact form configuration, and terrain interaction. Upload only the production output; local notes, drafts, tests, and dependencies are not deployment assets.
+
+The Topology v1 source release is commit `9726fdb`, published to Cloudflare Pages on September 5, 2026. The contact form's real delivery was confirmed by the site owner before release.
+
 ## Contact
 
 The existing Formspree endpoint is retained: `https://formspree.io/f/xjkrepbw`. It appears both as a native POST action and in `src/contact.js`. There are no public email addresses or phone numbers in the new page or structured data.
