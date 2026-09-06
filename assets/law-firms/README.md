@@ -1,4 +1,5 @@
 Logo sources:
+- Susman Godfrey: https://www.susmangodfrey.com/wp-content/uploads/2022/12/susman-godfrey-logo.svg
 - Quinn Emanuel: existing repository asset img/Logos/qe-logo.svg.
 - Orrick: https://media.orrick.com/Media%20Library/public/svg%20files/orrick-logo-rgb.svg
 - Simpson Thacher: https://www.stblaw.com/images/default-source/default-album/logo.png?sfvrsn=2
