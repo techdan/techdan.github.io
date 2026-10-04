@@ -143,6 +143,13 @@ export function underLens(curve, { lx, ly, R }) {
   return curve.pts.some(([x, y]) => Math.hypot(x - lx, y - ly) < R + 2);
 }
 
+// What clicking a claim chart row does: send the lens to find an unfound line, otherwise
+// hide or redraw that line's leader.
+export function chartAction({ found, hidden }) {
+  if (!found) return 'find';
+  return hidden ? 'show' : 'hide';
+}
+
 // Fraction of the remaining distance the lens covers in dt ms: 0.035 per 60fps frame, as
 // originally, but time-based so a slow frame never slows the lens down.
 export const lensStep = dt => 1 - (1 - 0.035) ** (dt / (1000 / 60));
@@ -162,7 +169,7 @@ export function mountLens({ field, canvas, hint, chart, count, leaders, grid, re
   const FILES = buildCorpus();
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const rnd = createRandom(31), pick = a => a[Math.floor(rnd() * a.length)];
-  const found = new Set(), foundAt = new Map();
+  const found = new Set(), foundAt = new Map(), hiddenLines = new Set();
   let curves = [], fieldOff = { left: 0, top: 0 };
   let g, dpr, mini, lx, ly, tx, ty, targetEl = null, auto = true, tour = 0, dwellMs = 0, holdUntil = 0, last = 0, idleTimer = 0, visible = true;
 
@@ -220,8 +227,33 @@ export function mountLens({ field, canvas, hint, chart, count, leaders, grid, re
     li.classList.add('found');
     li.querySelector('.cite').textContent = citation(f);
     count.textContent = found.size === 3 ? 'All elements located' : `${found.size} / 3 located`;
+    syncRow(f.el);
     placeLeaders();
   }
+
+  // Claim chart rows are buttons: find an unfound line, or hide / redraw a found line's leader.
+  function syncRow(el) {
+    row(el).setAttribute('aria-pressed', String(found.has(el) && !hiddenLines.has(el)));
+  }
+  function act(el) {
+    const i = FILES.findIndex(f => f.el === el), f = FILES[i], x = g && g.xs.get(i);
+    const action = chartAction({ found: found.has(el), hidden: hiddenLines.has(el) });
+    if (action === 'find') {
+      if (!g || x === undefined) return;
+      if (reduce) { mark(f); return; }
+      clearTimeout(idleTimer); auto = true; holdUntil = 0; dwellMs = 0;
+      targetEl = el; ({ x: tx, y: ty } = evidenceTarget(f, x, g));
+    } else if (action === 'hide') {
+      hiddenLines.add(el); syncRow(el); placeLeaders();
+    } else {
+      hiddenLines.delete(el); foundAt.set(el, performance.now()); syncRow(el); placeLeaders();
+    }
+  }
+  chart.querySelectorAll('li[data-el]').forEach(li => {
+    li.setAttribute('role', 'button'); li.tabIndex = 0; syncRow(li.dataset.el);
+    li.addEventListener('click', () => act(li.dataset.el));
+    li.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); act(li.dataset.el); } });
+  });
 
   // Leaders: SVG lines from the claim chart to the code. Each has its own mask so that,
   // wherever it passes under the lens, the plain line is hidden there and the
@@ -236,7 +268,7 @@ export function mountLens({ field, canvas, hint, chart, count, leaders, grid, re
     const defs = document.createElementNS(SVG, 'defs');
     leaders.append(defs);
     for (const [f, x] of shown()) {
-      if (!f.el || !found.has(f.el)) continue;
+      if (!f.el || !found.has(f.el) || hiddenLines.has(f.el)) continue;
       const r = row(f.el).getBoundingClientRect();
       const c = leaderCurve({ right: r.right - gr.left, top: r.top - gr.top, height: r.height }, fieldOff, f, x, g);
       const id = `lens-leader-${f.el}`, mask = document.createElementNS(SVG, 'mask');
@@ -277,11 +309,10 @@ export function mountLens({ field, canvas, hint, chart, count, leaders, grid, re
     }
   }
 
-  function highlight(f, x, tag) {
+  function highlight(f, x) {
     const y = lineY(g, f.evidence);
     ctx.fillStyle = 'rgba(243,222,79,.85)';
     ctx.fillRect(x + GUT * g.cw - 2, y - g.lh * .45, f.lines[f.evidence].length * g.cw + 4, g.lh * 1.5);
-    if (tag) { ctx.fillStyle = '#1D3FCF'; ctx.font = `500 9px ${MONO}`; ctx.fillText(f.el, x - 1, y + g.lh); }
   }
   function drawLens() {
     const { R, mag, lh, cw, colW } = g;
@@ -362,7 +393,7 @@ export function mountLens({ field, canvas, hint, chart, count, leaders, grid, re
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.drawImage(mini, 0, 0);
     ctx.scale(dpr, dpr);
-    for (const [f, x] of shown()) if (f.el && found.has(f.el)) highlight(f, x, true);
+    for (const [f, x] of shown()) if (f.el && found.has(f.el)) highlight(f, x);
     updateLeaders();
     drawLens();
   }
@@ -375,8 +406,8 @@ export function mountLens({ field, canvas, hint, chart, count, leaders, grid, re
   });
   field.addEventListener('pointerdown', e => { auto = false; [lx, ly] = toLocal(e); });
   reset.addEventListener('click', () => {
-    found.clear(); tour = 0;
-    chart.querySelectorAll('li').forEach(li => { li.classList.remove('found'); li.querySelector('.cite').textContent = 'not yet located'; });
+    found.clear(); hiddenLines.clear(); tour = 0;
+    chart.querySelectorAll('li').forEach(li => { li.classList.remove('found'); li.querySelector('.cite').textContent = 'not yet located'; syncRow(li.dataset.el); });
     count.textContent = '0 / 3 located'; placeLeaders();
     if (g) ({ x: tx, y: ty } = nextTarget());
   });

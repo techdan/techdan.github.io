@@ -83,6 +83,11 @@ h1, h2, h3 { font-family: var(--serif); font-weight: 400; text-wrap: balance; ma
 .chart li.found { background: color-mix(in srgb, var(--mark) 28%, var(--paper-3)); }
 .chart li.found .el { color: var(--cobalt); }
 .chart li.found .cite { color: var(--cobalt-deep); }
+.chart li[role="button"] { cursor: pointer; }
+.chart li[role="button"]:hover { background: color-mix(in srgb, var(--mark) 14%, var(--paper-3)); }
+.chart li.found[role="button"]:hover { background: color-mix(in srgb, var(--mark) 40%, var(--paper-3)); }
+.chart li.found[aria-pressed="false"] { background: var(--paper-3); }
+.chart li[role="button"]:focus-visible { outline: 2px solid var(--cobalt); outline-offset: -2px; }
 .chart-foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 8px 14px; border-top: 1px solid var(--rule); font-size: 12px; color: var(--slate); }
 .chart-foot button { background: none; border: 0; padding: 4px 0; font: 500 12px/1 var(--mono); color: var(--cobalt); letter-spacing: .04em; }
 

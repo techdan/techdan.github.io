@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { buildCorpus, tokenize, computeLayout, overEvidence, lineY, citation, leaderCurve, evidenceTarget, underLens, lensStep, GUT } from '../src/lens.js';
+import { buildCorpus, tokenize, computeLayout, overEvidence, lineY, citation, leaderCurve, evidenceTarget, underLens, chartAction, lensStep, GUT } from '../src/lens.js';
 
 // Regression: when 1a was found its leader ran under the lens and vanished. The lens stopped
 // 24 characters into the cited line, so the leader's end was under the glass but outside the
@@ -29,6 +29,12 @@ test('every leader that passes under the lens is magnified, wherever its end is'
   assert.equal(underLens(across, lens), true);
   assert.equal(underLens(grazing, lens), true);
   assert.equal(underLens(clear, lens), false);
+});
+
+test('clicking a claim chart row finds the line, then hides and redraws its leader', () => {
+  assert.equal(chartAction({ found: false, hidden: false }), 'find');
+  assert.equal(chartAction({ found: true, hidden: false }), 'hide');
+  assert.equal(chartAction({ found: true, hidden: true }), 'show');
 });
 
 test('lens speed does not depend on frame rate', () => {
