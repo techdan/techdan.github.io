@@ -26,9 +26,10 @@ function harness(fetchImpl) {
   class TestFormData extends FormData {
     constructor() { super(); Object.entries(fields).forEach(([name,field]) => this.set(name,field.value)); }
   }
-  const context = {document:{getElementById:id=>elements[id]}, HTMLInputElement:Field, HTMLTextAreaElement:Field, FormData:TestFormData, AbortController, Date, window:{setTimeout:()=>1,clearTimeout(){},requestIdleCallback(){}}, sendInquiry:(data,options)=>sendInquiry(data,{...options,fetchImpl})};
+  const destinations = [];
+  const context = {document:{getElementById:id=>elements[id]}, HTMLInputElement:Field, HTMLTextAreaElement:Field, FormData:TestFormData, AbortController, Date, window:{location:{assign:url=>destinations.push(url)},setTimeout:()=>1,clearTimeout(){},requestIdleCallback(){}}, sendInquiry:(data,options)=>sendInquiry(data,{...options,fetchImpl})};
   vm.runInNewContext(source, context);
-  return {fields,button,status,submit:()=>listeners.submit({preventDefault(){}}),resets:()=>resets};
+  return {fields,button,status,destinations,submit:()=>listeners.submit({preventDefault(){}}),resets:()=>resets};
 }
 
 test('a rejected inquiry retains the message, displays an error, and re-enables submission', async () => {
@@ -37,6 +38,7 @@ test('a rejected inquiry retains the message, displays an error, and re-enables 
   assert.equal(ui.fields.message.value,'A general technical inquiry.');
   assert.equal(ui.resets(),0);
   assert.equal(ui.status.dataset.state,'error');
+  assert.deepEqual(ui.destinations, []);
   assert.equal(ui.button.disabled,false);
 });
 test('confirmed provider acceptance clears the form and shows success', async () => {
@@ -44,6 +46,7 @@ test('confirmed provider acceptance clears the form and shows success', async ()
   await ui.submit();
   assert.equal(ui.resets(),1);
   assert.equal(ui.status.dataset.state,'success');
+  assert.deepEqual(ui.destinations, ['/thank-you.html']);
   assert.equal(ui.button.disabled,false);
 });
 test('repeated submit events cannot send a duplicate while a request is pending', async () => {

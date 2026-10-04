@@ -33,6 +33,7 @@ form.addEventListener('submit', async (event) => {
     form.reset();
     status.dataset.state = 'success';
     status.textContent = 'Thank you. Your inquiry has been sent. We’ll be in touch.';
+    window.location.assign('/thank-you.html');
   } catch (error) {
     status.dataset.state = 'error';
     status.textContent = error.message || 'We couldn’t confirm delivery. Your message is still here. Please try again in a moment.';
@@ -46,8 +47,8 @@ form.addEventListener('submit', async (event) => {
 });
 
 // The optional scene never blocks the form or readable page.
-const loadTerrain = () => import('./topology.js')
-  .then(({ mountTerrain }) => mountTerrain(document.getElementById('terrain-canvas')))
-  .catch(() => { /* Keep the static terrain visible if WebGL cannot load. */ });
-if ('requestIdleCallback' in window) window.requestIdleCallback(loadTerrain, { timeout: 1800 });
-else window.setTimeout(loadTerrain, 200);
+const loadHero = () => import('./hero-scene.js')
+  .then(({ mountHero }) => mountHero(document.getElementById('hero-canvas')))
+  .catch(() => { /* Keep the static illustration visible if the scene cannot load. */ });
+if ('requestIdleCallback' in window) window.requestIdleCallback(loadHero, { timeout: 1800 });
+else window.setTimeout(loadHero, 200);

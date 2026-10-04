@@ -1,4 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;450;500;550;600;650;700&family=Space+Grotesk:wght@400;500;600&display=swap');
+@font-face { font-family: 'DM Sans'; src: url('./assets/fonts/dm-sans.ttf') format('truetype'); font-style: normal; font-weight: 100 1000; font-display: swap; }
+@font-face { font-family: 'Space Grotesk'; src: url('./assets/fonts/space-grotesk.ttf') format('truetype'); font-style: normal; font-weight: 300 700; font-display: swap; }
 
 :root {
   color-scheme: dark;
@@ -15,6 +16,34 @@
 
 * {
   box-sizing: border-box;
+}
+
+[hidden] { display: none !important; }
+.footer-links { display: flex; flex-wrap: wrap; gap: 12px 22px; }
+.footer-links a, .footer-links button, .form-privacy a { text-decoration: underline; text-underline-offset: 4px; }
+.footer-links button { background: none; color: inherit; border: 0; padding: 0; font: inherit; cursor: pointer; }
+.site-footer { flex-wrap: wrap; }
+.document-page { padding-top: 160px; padding-bottom: 100px; min-height: 75vh; }
+.document-page h1 { font: 500 clamp(38px, 6vw, 68px)/1.12 var(--display); max-width: 900px; margin: 24px 0 40px; }
+.document-copy { max-width: 760px; color: var(--muted); line-height: 1.8; }
+.document-copy p { margin: 0 0 24px; }
+.document-copy h2 { font: 500 25px/1.3 var(--display); color: var(--ink); margin: 40px 0 16px; }
+.document-copy a:not(.button) { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; }
+.policy-date { font-size: 14px; }
+.mobile-cta { display: none; }
+.cookie-panel { position: fixed; z-index: 100; bottom: 20px; left: 20px; max-width: 470px; padding: 24px; border: 1px solid var(--line); background: var(--surface); box-shadow: 0 10px 50px #0008; max-height: calc(100dvh - 40px); overflow: auto; }
+.cookie-panel h2 { font: 500 22px/1.3 var(--display); margin: 0 0 12px; }
+.cookie-panel p { color: var(--muted); font-size: 14px; line-height: 1.6; }
+.cookie-panel a { text-decoration: underline; }
+.cookie-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 18px; }
+.cookie-actions button { flex: 1; padding: 12px; border: 1px solid var(--accent); background: transparent; color: var(--accent); cursor: pointer; min-height: 44px; }
+@media (max-width: 700px) {
+  body { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
+  .mobile-cta { position: fixed; display: flex; justify-content: space-between; align-items: center; bottom: 0; left: 0; right: 0; z-index: 40; padding: 18px 24px calc(18px + env(safe-area-inset-bottom, 0px)); background: var(--accent); color: var(--bg); font-weight: 600; box-shadow: 0 -4px 20px #0003; }
+  body:has(#contact:target) .mobile-cta, body:has(#contact:focus-within) .mobile-cta { display: none; }
+  .document-page { padding-top: 120px; padding-bottom: 60px; }
+  .cookie-panel { left: 12px; right: 12px; bottom: calc(80px + env(safe-area-inset-bottom, 0px)); max-width: none; max-height: calc(100dvh - 105px); }
+  .footer-links a, .footer-links button { min-height: 44px; display: inline-flex; align-items: center; }
 }
 
 html {
@@ -216,6 +245,117 @@ em {
 .hero-copy a {
   pointer-events: auto;
 }
+
+/* The three hero studies share one stage and one lightweight WebGL renderer. */
+.hero-art {
+  position: absolute;
+  z-index: 1;
+  right: -12%;
+  top: 0;
+  height: 100%;
+  width: 78%;
+  isolation: isolate;
+}
+.hero-art-heading {
+  position: absolute;
+  top: 35px;
+  left: 38%;
+  right: 16%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #91aab9;
+  font-size: 8px;
+  letter-spacing: 1.5px;
+}
+#concept-number { margin-left: auto; }
+.hero-art-stage {
+  position: absolute;
+  inset: 35px 0 85px;
+  background: radial-gradient(ellipse at 61% 48%, #142e442e, transparent 62%);
+}
+.hero-art-stage::before {
+  content: '';
+  position: absolute;
+  bottom: 5%;
+  left: 28%;
+  width: 44%;
+  height: 5%;
+  border-radius: 50%;
+  background: #020e19;
+  filter: blur(14px);
+  opacity: .6;
+}
+#hero-art-fallback, .hero-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+#hero-art-fallback { object-fit: contain; }
+.hero-art.is-live #hero-art-fallback { visibility: hidden; }
+.hero-canvas {
+  display: block;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  cursor: crosshair;
+  touch-action: pan-y;
+}
+.hero-canvas canvas { display: block; width: 100%; height: 100%; mask-image: linear-gradient(90deg, transparent 15%, #000 40%, #000 88%, transparent); }
+.hero-canvas:focus-visible { outline-offset: -12px; outline: 1px dashed var(--accent); }
+.hero-art-annotation {
+  position: absolute;
+  right: 17%;
+  bottom: 20%;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  pointer-events: none;
+  color: #a4bac6;
+  font-size: 7px;
+  letter-spacing: 1.4px;
+}
+.hero-art-annotation span { width: 32px; height: 1px; background: #7595a5; }
+.hero-art-annotation b { font-weight: 400; }
+.is-expanded .hero-art-annotation { color: var(--accent); }
+.is-expanded .hero-art-annotation span { background: var(--accent); }
+.hero-art-caption { position: absolute; left: 34%; right: 15%; bottom: 20px; }
+.hero-art-instructions { display: flex; gap: 8px; align-items: center; min-height: 30px; }
+#concept-description { font-size: 11px; color: #b9cbd1; line-height: 1.5; }
+.motion-toggle { flex: none; margin-left: auto; width: 32px; height: 32px; border: 1px solid #365362; border-radius: 50%; background: #0b2230; color: #b7cad2; font-size: 12px; }
+.motion-toggle:hover { border-color: var(--accent); color: var(--accent); }
+.concept-hint { color: #8ea7b6; font-size: 9px; letter-spacing: .3px; margin: 0 0 14px; }
+.concept-picker { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-block: 1px solid #36505e; }
+.concept-picker button { position: relative; min-height: 49px; padding: 8px 9px; color: #9db4c1; background: none; border: 0; font-size: 10px; white-space: nowrap; transition: background .2s, color .2s; }
+.concept-picker button + button { border-left: 1px solid #29434f; }
+.concept-picker button span { font-size: 8px; margin-right: 7px; opacity: .65; }
+.concept-picker button[aria-pressed=true] { color: var(--accent); background: #dce7ac0a; }
+.concept-picker button[aria-pressed=true]::after { content: ''; position: absolute; bottom: -1px; height: 2px; background: var(--accent); left: 0; right: 0; }
+.concept-picker button:hover { color: var(--ink); background: #b0d7e10d; }
+@media (min-width: 1600px) { .hero-art { width: 82%; right: -14%; } .hero-art-stage { inset-block: 35px 85px; } }
+@media (min-width: 801px) and (max-width: 1150px) { .hero-art { width: 78%; right: -12%; } .hero-art-caption { left: 29%; right: 15%; } .concept-picker button { padding-inline: 4px; font-size: 9px; } .concept-picker button span { margin-right: 4px; } }
+@media (max-width: 1000px) {
+  .hero-inner:has(.hero-art) { min-height: 0; flex-direction: column; }
+  .hero-inner:has(.hero-art) .hero-copy { width: 100%; padding: 56px 0 20px; }
+  .hero-art { position: relative; flex: none; top: auto; bottom: auto; right: auto; width: 100%; height: 490px; }
+  .hero-art-heading { top: 8px; left: 0; right: 0; font-size: 7px; }
+  .hero-art-stage { inset: 20px -36px 104px; }
+  .hero-canvas canvas { mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+  .hero-art-caption { bottom: 16px; left: 0; right: 0; }
+  .hero-art-annotation { right: 9%; bottom: 8%; font-size: 6px; }
+  .motion-toggle { width: 44px; height: 44px; }
+  .hero-art-instructions { min-height: 44px; }
+  .concept-picker button { min-height: 48px; }
+  .concept-hint { margin-top: -5px; margin-bottom: 12px; }
+}
+@media (max-width: 380px) {
+  .concept-picker button { font-size: 9px; padding-inline: 4px; }
+  .concept-picker button span { margin-right: 4px; }
+  #concept-description { font-size: 10px; }
+}
+@media (prefers-reduced-motion: reduce) { .concept-picker button { transition: none; } }
 
 .hero .eyebrow {
   display: flex;
@@ -1135,7 +1275,7 @@ h1 {
   .terrain-top {
     top: 22px;
     left: 8%;
-    right: 8%;
+    right: 17%;
   }
   .hero-bottom {
     font-size: 7px;
