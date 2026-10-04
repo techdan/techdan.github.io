@@ -1,6 +1,6 @@
-# Manheim Consulting — Interactive hero concepts
+# Manheim Consulting website
 
-A static, GitHub Pages-compatible website with three progressively loaded Three.js hero concepts. The readable page and native contact form work without the animation.
+A static, GitHub Pages-compatible website. The hero ("The Lens") is a progressively loaded canvas animation; the readable page and native contact form work without it.
 
 ## Local development
 
@@ -10,7 +10,7 @@ npm run build-static
 npm run dev
 ```
 
-Edit `index.html` for content and metadata, and the files in `src/` for styles and behavior. Run `scripts/build.bat` on Windows (or `npm run build-static`) after source changes. This updates root-level CSS and JavaScript for GitHub Pages. JavaScript source imports are relative to the generated root-level files. The hero's scene models live in `src/hero-concepts.js`; controls, rendering, and lifecycle live in `src/hero-scene.js`.
+Edit `index.html` for content and metadata, and the files in `src/` for styles and behavior. Run `scripts/build.bat` on Windows (or `npm run build-static`) after source changes. This updates root-level CSS and JavaScript for GitHub Pages. JavaScript source imports are relative to the generated root-level files. The hero lives in `src/lens.js`.
 
 ```sh
 npm test
@@ -37,13 +37,9 @@ Tests mock the provider. They do not send email or verify inbox delivery. Before
 
 ## Motion and assets
 
-Three.js 0.160.1 is self-hosted in `vendor/`, with its MIT license. The hero offers three original GPU particle studies, informed by the public MotionSites previews for [Anchor AI](https://motionsites.ai/?prompt=anchor-ai), [Particle Field](https://motionsites.ai/?prompt=particle-field), and [Futuristic Cinematic](https://motionsites.ai/?prompt=futuristic-cinematic):
+`src/lens.js` draws a minimap of example source files with a magnifier that finds the three lines supporting an example claim chart (the code and claim are illustrative, and labeled as such on the page). Its pure parts (example corpus, tokenizer, layout, hit test) are covered by `tests/lens.test.mjs`. The field re-measures itself with a `ResizeObserver` and waits until it has a real size before drawing, so a page opened in a background tab or a hidden frame still starts correctly. Without JavaScript the field shows a static code texture. Reduced-motion users get the finished chart without the moving lens. Rendering pauses offscreen.
 
-- **Tidal Field:** a folded particle surface with traveling swells, coherent filaments, and loose spray.
-- **Signal Bloom:** a flowing canopy rises from a narrow stem above reflected interference rings.
-- **Gravity Well:** an iridescent particle disc spirals around a quiet center.
-
-Each study uses 48,000 seeded particles on desktop or 22,000 on mobile. Custom vertex shaders animate the forms, apply a circular cursor lens, and propagate up to eight overlapping disturbances. A second point pass adds a soft light halo. Move to part the particles, hold to gather them, and release to send a wave. Enter/Space sends a centered wave; Escape clears disturbances. The motion button pauses idle movement while allowing deliberate interactions to finish. Reduced-motion users receive a still signal without animation. Rendering stops offscreen and in background tabs; switching studies disposes GPU resources. An original generated SVG covers disabled JavaScript and unavailable/lost WebGL. The old sphere, constellation, and layers studies have been removed. The original terrain modules remain available but are not loaded by the homepage. Fonts are self-hosted in assets/fonts.
+Fonts (Newsreader, Public Sans, IBM Plex Mono) are self-hosted from `@fontsource` packages; `npm run build-static` copies them into `assets/fonts` with their OFL licenses.
 
 The company-name strip describes whose software has been analyzed; it is not a client or endorsement list. The experience figures and service descriptions use the supplied business facts. Detailed service pages, additional credentials, approved case studies, analytics, and Search Console setup can be added later.
 

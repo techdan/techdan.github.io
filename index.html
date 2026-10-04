@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#081b2b">
+  <meta name="theme-color" content="#F3F4F0">
   <title>Source Code Analysis for Software Litigation | Manheim Consulting</title>
   <meta name="description" content="Manheim Consulting provides source code analysis for software litigation. Led by Dan Manheim, we turn complex systems into clear architecture and cited claim charts.">
   <link rel="canonical" href="https://www.manheimconsultingexperts.com/">
@@ -22,11 +22,13 @@
   <link rel="icon" href="/favicon.ico" sizes="32x32">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180">
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="./assets/fonts/newsreader-opsz.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="./assets/fonts/ibm-plex-mono-400.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="./style.css">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@graph":[
     {"@type":"Organization","@id":"https://www.manheimconsultingexperts.com/#organization","name":"Manheim Consulting","url":"https://www.manheimconsultingexperts.com/","description":"Source code analysis, system architecture analysis, and claim chart development for software litigation.","employee":{"@id":"https://www.manheimconsultingexperts.com/#dan-manheim"},"knowsAbout":["Source code analysis","Software litigation","Patent litigation","Claim charts","Software architecture"]},
-    {"@type":"Person","@id":"https://www.manheimconsultingexperts.com/#dan-manheim","name":"Dan Manheim","jobTitle":"Principal Consultant","worksFor":{"@id":"https://www.manheimconsultingexperts.com/#organization"},"url":"https://www.manheimconsultingexperts.com/#about"},
+    {"@type":"Person","@id":"https://www.manheimconsultingexperts.com/#dan-manheim","name":"Dan Manheim","jobTitle":"Principal Consultant","worksFor":{"@id":"https://www.manheimconsultingexperts.com/#organization"},"url":"https://www.manheimconsultingexperts.com/#expertise"},
     {"@type":"Service","name":"Source code analysis for software litigation","serviceType":"Software litigation technical consulting","provider":{"@id":"https://www.manheimconsultingexperts.com/#organization"},"url":"https://www.manheimconsultingexperts.com/"}
   ]}
   </script>
@@ -36,111 +38,138 @@
   <header class="site-header">
     <div class="shell header-inner">
       <a class="brand" href="#" aria-label="Manheim Consulting home">
-        <svg class="brand-mark" viewBox="0 0 80 80" fill="none" aria-hidden="true"><path d="M23 59 6 74V6L74 74V6L45 33M15 35l27 27"/></svg>
-        <span>MANHEIM<span class="brand-sub">CONSULTING</span></span>
+        <svg class="brand-mark" viewBox="0 0 80 80" aria-hidden="true"><path d="M23 59 6 74V6L74 74V6L45 33M15 35l27 27"/></svg>
+        <span>Manheim Consulting</span>
       </a>
       <nav class="main-nav" aria-label="Main navigation">
-        <a class="nav-secondary" href="#process">Our approach</a><a class="nav-secondary" href="#about">About us</a>
-        <a class="nav-contact" href="#contact">Discuss a matter <span aria-hidden="true">↗</span></a>
+        <a class="nav-secondary" href="#approach">Approach</a><a class="nav-secondary" href="#expertise">Expertise</a><a class="nav-secondary" href="#firms">Firms</a>
+        <a class="nav-contact" href="#contact">Discuss a matter</a>
       </nav>
     </div>
   </header>
   <main id="main" tabindex="-1">
     <section class="hero" aria-labelledby="hero-title">
-      <div class="shell hero-inner">
+      <div class="shell hero-grid" id="hero-grid">
         <div class="hero-copy">
-          <p class="eyebrow"><span class="status-dot" aria-hidden="true"></span>Source code analysis for software litigation</p>
-          <h1 id="hero-title">See the system.<br>Find the <em>signal.</em></h1>
-          <p class="hero-description">Complex software. Critical questions.<br>We find what matters—and document the evidence behind it.</p>
-          <div class="hero-actions"><a class="button button-primary" href="#contact">Discuss a matter <span aria-hidden="true">↗</span></a><a class="text-link" href="#process">Explore our approach <span aria-hidden="true">↓</span></a></div>
-        </div>
-        <figure class="hero-art" data-concept="tide" aria-label="Interactive particle studies inspired by waves, organic growth, and gravity">
-          <div class="hero-art-heading"><span class="crosshair" aria-hidden="true">+</span><span id="concept-kicker">ORDER IN THE UNDERCURRENT</span><span id="concept-number">STUDY 01</span></div>
-          <div class="hero-art-stage">
-            <img id="hero-art-fallback" src="./assets/particle-fallback.svg" width="1000" height="640" alt="Thousands of blue, teal, and gold particles form a flowing wave" fetchpriority="high">
-            <button id="hero-canvas" class="hero-canvas" type="button" aria-label="Send a ripple through the tidal particle field" aria-describedby="concept-hint" hidden></button>
-            <span class="hero-art-annotation" aria-hidden="true"><span></span><b id="concept-annotation">PARTICLE STUDY / 01</b></span>
+          <p class="eyebrow">Source code analysis for software litigation</p>
+          <h1 id="hero-title">Somewhere in a million lines is <em>the one</em> that matters.</h1>
+          <p class="lede">We read the source code, map it to the claims, and cite every line that supports your expert’s report.</p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#contact">Discuss a matter <span aria-hidden="true">→</span></a>
+            <a class="text-link" href="#approach">How we work</a>
           </div>
-          <figcaption class="hero-art-caption">
-            <div class="hero-art-instructions"><p id="concept-description">A living surface, written in light.</p><button class="motion-toggle" type="button" aria-label="Pause automatic motion" hidden><span aria-hidden="true">Ⅱ</span></button></div>
-            <p id="concept-hint" class="concept-hint">An illustration of order emerging from a particle field.</p>
-            <div class="concept-picker" role="group" aria-label="Compare hero concepts" hidden>
-              <button type="button" data-concept="tide" aria-pressed="true"><span>01</span>Tidal Field</button>
-              <button type="button" data-concept="bloom" aria-pressed="false"><span>02</span>Signal Bloom</button>
-              <button type="button" data-concept="well" aria-pressed="false"><span>03</span>Gravity Well</button>
-            </div>
-          </figcaption>
-          <span class="hero-art-status visually-hidden" role="status" aria-live="polite" aria-atomic="true"></span>
-        </figure>
+          <div class="chart" id="lens-chart">
+            <div class="chart-head"><p class="eyebrow">Claim chart · example</p><span class="count" id="lens-count" aria-live="polite">0 / 3 located</span></div>
+            <ol>
+              <li data-el="1a"><span class="el">1[a]</span><span class="limit">receiving a playback position from a first device;</span><span class="cite">not yet located</span></li>
+              <li data-el="1b"><span class="el">1[b]</span><span class="limit">storing the position in association with a user account;</span><span class="cite">not yet located</span></li>
+              <li data-el="1c"><span class="el">1[c]</span><span class="limit">sending the stored position to a second device on resume.</span><span class="cite">not yet located</span></li>
+            </ol>
+            <div class="chart-foot"><span>Example claim and code written for this page.</span><button type="button" id="lens-reset">Reset</button></div>
+          </div>
+        </div>
+        <div class="lens-field" id="lens-field" role="img" aria-label="Several source files shown as a code minimap. A magnifying lens moves across them and finds three lines that match the example claim chart.">
+          <canvas id="lens-canvas"></canvas>
+          <span class="hint" id="lens-hint">Move over the code to inspect it</span>
+        </div>
+        <svg class="leaders" id="lens-leaders" aria-hidden="true"></svg>
       </div>
-      <div class="shell hero-bottom"><span>FROM SOURCE CODE TO SUPPORTED CONCLUSIONS</span><a href="#process" aria-label="Scroll to our approach">SCROLL TO EXPLORE <span aria-hidden="true">↓</span></a></div>
     </section>
-    <section class="proof shell" aria-label="Our experience">
-      <div class="proof-intro"><span class="eyebrow">Depth that makes a difference</span><p>Experienced analysis.<br>Personal accountability.</p></div>
-      <div class="proof-stat"><strong>100<span>+</span></strong><span>Litigation cases</span></div>
-      <div class="proof-stat"><strong>15<span>+</span></strong><span>Years of experience</span></div>
-      <div class="proof-person"><span class="small-label">Led by</span><strong>Dan Manheim</strong><span>Principal consultant</span></div>
+
+    <section class="proof" aria-label="Our experience">
+      <div class="shell proof-grid">
+        <div class="stat"><strong>100+</strong><span>litigation<br>matters</span></div>
+        <div class="stat"><strong>15+</strong><span>years analyzing<br>source code</span></div>
+        <div class="stat stat-team"><p>A focused team, led by principal consultant Dan&nbsp;Manheim.</p></div>
+      </div>
     </section>
-    <section id="process" class="process section-pad">
+
+    <section id="approach" class="section-pad">
       <div class="shell">
-        <div class="section-heading"><p class="eyebrow section-number">01 / OUR APPROACH</p><div><h2>From complexity<br>to <em>clarity.</em></h2><p>Understanding the code is the beginning.<br>Making it useful to your case is the work.</p></div></div>
-        <div class="process-grid">
-          <article class="process-step">
-            <div class="step-top"><span class="step-number">01</span><span class="small-label">THE DETAILS</span></div>
-            <svg class="process-art" viewBox="0 0 320 125" fill="none" aria-hidden="true"><g class="art-muted"><path d="M24 32h59v17H24zM105 14h75v17h-75zM39 78h76v17H39zM151 60h54v17h-54zM227 23h61v17h-61zM216 96h78v17h-78z"/><path d="m83 41 68 27M180 22l47 10M115 87l36-18M205 69l38 35M258 40l-16 56"/></g><path class="art-accent" d="M132 43h93v51h-93zM144 54h22m-22 7h48m-48 7h36m-36 7h54m-54 7h28"/></svg>
-            <h3>Ingest.</h3><p>We examine the source code and document the key components, behaviors, and features of the system.</p><span class="step-output">OUTPUT <b>Detailed technical notes</b></span>
-          </article>
-          <article class="process-step">
-            <div class="step-top"><span class="step-number">02</span><span class="small-label">THE BIG PICTURE</span></div>
-            <svg class="process-art" viewBox="0 0 320 125" fill="none" aria-hidden="true"><g class="art-muted"><path d="M160 42v20M65 62h190M65 62v19m95-19v19m95-19v19M40 81h50v26H40zM135 81h50v26h-50zM230 81h50v26h-50z"/><path d="M52 91h26m-26 7h18m77-7h26m-26 7h18m77-7h26m-26 7h18"/></g><path class="art-accent" d="M126 14h68v28h-68zM138 24h44m-44 8h28M160 42v20m0 0h95v19"/><circle class="art-accent" cx="160" cy="62" r="3"/></svg>
-            <h3>Digest.</h3><p>We connect those details into a clear, high-level view of the architecture: how the system works and how its parts fit together.</p><span class="step-output">OUTPUT <b>System architecture overview</b></span>
-          </article>
-          <article class="process-step">
-            <div class="step-top"><span class="step-number">03</span><span class="small-label">THE EVIDENCE</span></div>
-            <svg class="process-art" viewBox="0 0 320 125" fill="none" aria-hidden="true"><g class="art-muted"><path d="M35 18h88v88H35zM47 32h58m-58 12h43m-43 12h54m-54 12h38m-38 12h59m-59 12h42M211 18h78v88h-78zM211 40h78m-78 22h78m-78 22h78m-53-66v88"/></g><path class="art-accent" d="M92 55h52l28-26h39M106 80h44l28-29h33M82 93h76l30-20h23"/><circle class="art-accent" cx="92" cy="55" r="3"/><circle class="art-accent" cx="106" cy="80" r="3"/><path class="art-accent" d="m249 28 4 4 8-9m-12 27 4 4 8-9m-12 27 4 4 8-9"/></svg>
-            <h3>Synthesize.</h3><p>We map documented features to claim elements, building claim charts with precise citations and technical support for your expert report.</p><span class="step-output">OUTPUT <b>Cited claim charts</b></span>
-          </article>
+        <div class="section-head">
+          <p class="eyebrow">How we work</p>
+          <div>
+            <h2>From the source to a supported conclusion.</h2>
+            <p>Understanding the code is the beginning. Making it useful to your case is the work. What you receive is the end product: claim charts that cite the code, line by line.</p>
+          </div>
+        </div>
+        <div class="steps">
+          <article class="step"><span class="step-label">Step 1 · The details</span><h3>Ingest</h3><p>We examine the source code and document the key components, behaviors, and features of the system.</p></article>
+          <article class="step"><span class="step-label">Step 2 · The big picture</span><h3>Digest</h3><p>We connect those details into a clear, high-level view of the architecture: how the system works and how its parts fit together.</p></article>
+          <article class="step"><span class="step-label">Step 3 · The evidence</span><h3>Synthesize</h3><p>We map documented features to claim elements, building claim charts with precise citations and technical support for your expert report.</p><div class="deliverable"><span>Your deliverable</span>Cited claim charts</div></article>
         </div>
       </div>
     </section>
-    <section id="about" class="about section-pad shell">
-      <div class="section-heading"><p class="eyebrow section-number">02 / THE EXPERTISE</p><div><h2>Deep in the code.<br>Focused on <em>your case.</em></h2></div></div>
-      <div class="about-grid">
-        <div class="principal"><img class="principal-photo" src="./assets/dan-manheim-studio.webp" alt="Dan Manheim" width="104" height="120" loading="lazy"><div><h3>Dan Manheim</h3><p>Principal Consultant</p><nav class="profile-links" aria-label="Dan Manheim’s social profiles"><a href="https://www.linkedin.com/in/danmanheim/" target="_blank" rel="noopener noreferrer" aria-label="Dan Manheim on LinkedIn (opens in a new tab)">LinkedIn <span aria-hidden="true">↗</span></a><a href="https://x.com/techdan" target="_blank" rel="noopener noreferrer" aria-label="Dan Manheim on X (opens in a new tab)">X <span aria-hidden="true">↗</span></a></nav></div></div>
-        <div class="about-copy"><p class="lead">Manheim Consulting helps litigation teams turn complex software into clear, documented technical analysis.</p><p>Led by Dan Manheim, we bring more than 15 years of experience across 100+ litigation cases. We work closely with counsel and testifying experts to develop the system understanding, claim mappings, and technical theories that support an expert report.</p><p>Our focus is source code analysis for patent litigation. Expert witness services, including deposition and trial testimony, are also available when the matter calls for them.</p></div>
-      </div>
-      <div class="expertise-list"><h3 class="small-label expertise-label">Systems we understand</h3><ul><li>Mobile &amp; web applications</li><li>Smartphones &amp; mobile platforms</li><li>Smart home &amp; IoT</li><li>E-commerce &amp; fintech</li><li>Data processing &amp; algorithms</li><li>Network protocols &amp; internet technologies</li></ul></div>
-      <div class="company-strip"><h3 class="small-label expertise-label">Experience analyzing software from</h3><ul aria-label="Companies whose software we have analyzed"><li class="logo-with-label"><img class="company-logo company-logo-google" src="./assets/companies/google.svg" alt="Google LLC" tabindex="0" width="42" height="42" loading="lazy"><span class="logo-tooltip" aria-hidden="true">Google LLC</span></li><li class="logo-with-label"><img class="company-logo company-logo-amazon" src="./assets/companies/amazon.svg" alt="Amazon.com, Inc." tabindex="0" width="42" height="42" loading="lazy"><span class="logo-tooltip" aria-hidden="true">Amazon.com, Inc.</span></li><li class="logo-with-label"><img class="company-logo company-logo-apple" src="./assets/companies/apple.svg" alt="Apple Inc." tabindex="0" width="42" height="42" loading="lazy"><span class="logo-tooltip" aria-hidden="true">Apple Inc.</span></li><li class="logo-with-label"><img class="company-logo company-logo-meta" src="./assets/companies/meta.svg" alt="Meta Platforms, Inc." tabindex="0" width="42" height="42" loading="lazy"><span class="logo-tooltip" aria-hidden="true">Meta Platforms, Inc.</span></li><li class="logo-with-label"><img class="company-logo company-logo-microsoft" src="./assets/companies/microsoft.svg" alt="Microsoft Corporation" tabindex="0" width="42" height="42" loading="lazy"><span class="logo-tooltip" aria-hidden="true">Microsoft Corporation</span></li><li class="logo-with-label"><img class="company-logo company-logo-samsung" src="./assets/companies/samsung.svg" alt="Samsung Electronics" tabindex="0" width="112" height="42" loading="lazy"><span class="logo-tooltip" aria-hidden="true">Samsung Electronics</span></li></ul></div>
-      <div class="law-firm-strip">
-        <h3 class="small-label expertise-label">Law firms we’ve worked with</h3>
-        <ul aria-label="Law firms we have worked with">
-          <li class="logo-with-label"><img class="law-firm-logo law-firm-logo-susman-godfrey" src="./assets/law-firms/susman-godfrey.svg" alt="Susman Godfrey LLP" tabindex="0" width="180" height="64" loading="lazy"><span class="logo-tooltip" aria-hidden="true">Susman Godfrey LLP</span></li>
-          <li class="logo-with-label"><img class="law-firm-logo law-firm-logo-quinn-emanuel" src="./assets/law-firms/quinn-emanuel.svg" alt="Quinn Emanuel Urquhart &amp; Sullivan, LLP" tabindex="0" width="180" height="64" loading="lazy"><span class="logo-tooltip" aria-hidden="true">Quinn Emanuel Urquhart &amp; Sullivan, LLP</span></li>
-          <li class="logo-with-label"><img class="law-firm-logo law-firm-logo-orrick" src="./assets/law-firms/orrick.svg" alt="Orrick, Herrington &amp; Sutcliffe LLP" tabindex="0" width="180" height="64" loading="lazy"><span class="logo-tooltip" aria-hidden="true">Orrick, Herrington &amp; Sutcliffe LLP</span></li>
-          <li class="logo-with-label"><img class="law-firm-logo law-firm-logo-simpson-thacher" src="./assets/law-firms/simpson-thacher.png" alt="Simpson Thacher &amp; Bartlett LLP" tabindex="0" width="180" height="64" loading="lazy"><span class="logo-tooltip" aria-hidden="true">Simpson Thacher &amp; Bartlett LLP</span></li>
-          <li class="logo-with-label"><img class="law-firm-logo law-firm-logo-russ-august-kabat" src="./assets/law-firms/russ-august-kabat.svg" alt="Russ August &amp; Kabat" tabindex="0" width="180" height="64" loading="lazy"><span class="logo-tooltip" aria-hidden="true">Russ August &amp; Kabat</span></li>
-          <li class="logo-with-label"><img class="law-firm-logo law-firm-logo-boies-schiller" src="./assets/law-firms/boies-schiller.svg" alt="Boies Schiller Flexner LLP" tabindex="0" width="180" height="64" loading="lazy"><span class="logo-tooltip" aria-hidden="true">Boies Schiller Flexner LLP</span></li>
-        </ul>
+
+    <section id="expertise" class="section-pad section-pad-tight">
+      <div class="shell bio">
+        <figure class="portrait">
+          <img src="./assets/dan-manheim-2025.png" alt="Dan Manheim" width="262" height="300" loading="lazy">
+          <figcaption><strong>Dan Manheim</strong>Principal consultant · Leads the team
+            <nav class="profile-links" aria-label="Dan Manheim’s social profiles"><a href="https://www.linkedin.com/in/danmanheim/" target="_blank" rel="noopener noreferrer" aria-label="Dan Manheim on LinkedIn (opens in a new tab)">LinkedIn</a><a href="https://x.com/techdan" target="_blank" rel="noopener noreferrer" aria-label="Dan Manheim on X (opens in a new tab)">X</a></nav>
+          </figcaption>
+        </figure>
+        <div class="bio-text">
+          <p class="eyebrow">The expertise</p>
+          <p class="lead">Manheim Consulting is a focused team of source code analysts led by Dan Manheim. We help litigation teams turn complex software into clear, documented technical analysis, working closely with counsel and testifying experts to develop the system understanding, claim mappings, and technical theories behind an expert report.</p>
+          <p>Our focus is source code analysis for patent litigation. Expert witness services, including deposition and trial testimony, are available when the matter calls for them.</p>
+          <ul class="systems" aria-label="Systems we understand"><li>Mobile &amp; web applications</li><li>Smartphones &amp; mobile platforms</li><li>Smart home &amp; IoT</li><li>E-commerce &amp; fintech</li><li>Data processing &amp; algorithms</li><li>Network protocols &amp; internet technologies</li></ul>
+        </div>
       </div>
     </section>
+
+    <section id="firms" class="firms" aria-label="Law firms and software">
+      <div class="shell">
+        <div class="logos">
+          <h2 class="eyebrow">Some of the law firms we’ve worked with</h2>
+          <ul class="wall wall-firms">
+            <li><img src="./assets/law-firms/susman-godfrey.svg" alt="" loading="lazy"><span class="name">Susman Godfrey LLP</span></li>
+            <li><img src="./assets/law-firms/quinn-emanuel.svg" alt="" loading="lazy"><span class="name">Quinn Emanuel Urquhart &amp; Sullivan</span></li>
+            <li><img src="./assets/law-firms/orrick.svg" alt="" loading="lazy"><span class="name">Orrick, Herrington &amp; Sutcliffe</span></li>
+            <li><img src="./assets/law-firms/simpson-thacher.png" alt="" loading="lazy"><span class="name">Simpson Thacher &amp; Bartlett</span></li>
+            <li><img src="./assets/law-firms/russ-august-kabat.svg" alt="" loading="lazy"><span class="name">Russ August &amp; Kabat</span></li>
+            <li><img src="./assets/law-firms/boies-schiller.svg" alt="" loading="lazy"><span class="name">Boies Schiller Flexner LLP</span></li>
+          </ul>
+        </div>
+        <div class="logos">
+          <h2 class="eyebrow">Examples of software we’ve analyzed</h2>
+          <ul class="wall">
+            <li><img class="mark" src="./assets/companies/google.svg" alt="" loading="lazy"><span class="name">Google</span></li>
+            <li><img src="./assets/companies/amazon.svg" alt="" loading="lazy"><span class="name">Amazon</span></li>
+            <li><img class="mark" src="./assets/companies/apple.svg" alt="" loading="lazy"><span class="name">Apple</span></li>
+            <li><img class="mark" src="./assets/companies/meta.svg" alt="" loading="lazy"><span class="name">Meta</span></li>
+            <li><img class="mark" src="./assets/companies/microsoft.svg" alt="" loading="lazy"><span class="name">Microsoft</span></li>
+            <li><img src="./assets/companies/samsung.svg" alt="" loading="lazy"><span class="name">Samsung</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
     <section id="contact" class="contact section-pad">
       <div class="shell contact-grid">
-        <div class="contact-copy"><p class="eyebrow">03 / START A CONVERSATION</p><h2>What needs<br>to be <em>understood?</em></h2><p>Tell us a little about your matter and the technical questions at hand. We’ll follow up to discuss how we can help.</p><div class="contact-note"><span aria-hidden="true">↗</span><p>A direct conversation.<br>Experienced technical perspective.</p></div></div>
+        <div class="contact-copy">
+          <p class="eyebrow">Start a conversation</p>
+          <h2>What needs to be <em>understood?</em></h2>
+          <p>Tell us a little about the matter and the technical questions at hand. We’ll follow up to discuss how we can help.</p>
+          <p class="contact-aside">Early in a case is the best time to call. We can help scope source code review before the inspection window opens.</p>
+        </div>
         <form id="contact-form" action="https://formspree.io/f/xjkrepbw" method="POST">
-          <div class="form-row"><div class="field"><label for="name">Your name <span>(required)</span></label><input id="name" name="name" autocomplete="name" required maxlength="150" placeholder="Full name"></div><div class="field"><label for="firm">Firm / organization</label><input id="firm" name="firm" autocomplete="organization" maxlength="200" placeholder="Organization name"></div></div>
-          <div class="field"><label for="email">Email address <span>(required)</span></label><input id="email" name="email" type="email" autocomplete="email" required maxlength="254" placeholder="Where we can reach you"></div>
-          <div class="field"><label for="message">How can we help? <span>(required)</span></label><textarea id="message" name="message" rows="4" required maxlength="5000" placeholder="A brief overview of your matter or technical needs" aria-describedby="message-help"></textarea><p id="message-help" class="field-help">Please keep this initial message general and leave out confidential case details.</p></div>
+          <div class="form-title"><h3>New matter inquiry</h3><span class="eyebrow">Page 1 of 1</span></div>
+          <div class="form-row"><div class="field-group"><label for="name">Your name <span class="req" aria-hidden="true">*</span></label><input id="name" name="name" autocomplete="name" required maxlength="150"></div><div class="field-group"><label for="firm">Firm</label><input id="firm" name="firm" autocomplete="organization" maxlength="200"></div></div>
+          <div class="field-group"><label for="email">Email <span class="req" aria-hidden="true">*</span></label><input id="email" name="email" type="email" autocomplete="email" required maxlength="254"></div>
+          <div class="field-group"><label for="message">How can we help? <span class="req" aria-hidden="true">*</span></label><textarea id="message" name="message" rows="4" required maxlength="5000" aria-describedby="message-help"></textarea></div>
+          <p id="message-help" class="field-help">Keep this first message general. Please leave out confidential case details.</p>
           <div class="honeypot" aria-hidden="true"><label for="website">Leave this field empty</label><input id="website" type="text" name="_gotcha" tabindex="-1" autocomplete="off"></div>
           <input type="hidden" name="_subject" value="New inquiry — Manheim Consulting">
-          <div class="form-footer"><span class="form-privacy">Your details are used to respond to your inquiry. <a href="/privacy.html">Privacy policy</a>.</span><button class="button button-primary" type="submit"><span id="submit-label">Send inquiry</span><span aria-hidden="true">↗</span></button></div>
+          <div class="form-footer"><span class="form-privacy">Your details are used to respond to your inquiry. <a href="/privacy.html">Privacy policy</a>.</span><button class="button button-primary" type="submit"><span id="submit-label">Send inquiry</span><span aria-hidden="true">→</span></button></div>
           <p id="form-status" class="form-status" role="status" aria-live="polite" aria-atomic="true"></p>
           <noscript><p class="field-help">Submitting this form will take you to our form provider to complete delivery.</p></noscript>
         </form>
       </div>
     </section>
   </main>
-  <footer class="site-footer shell"><a class="footer-brand" href="#">Manheim Consulting<span aria-hidden="true">↗</span></a><p>Source code. System understanding. Supported conclusions.</p><nav class="footer-links" aria-label="Legal and contact"><a href="/#contact">Contact</a><a href="/privacy.html">Privacy policy</a><a href="/terms.html">Terms and conditions</a><button type="button" data-cookie-settings hidden>Cookie settings</button></nav><span>© <span id="year">2026</span> Manheim Consulting</span></footer>
-  <a class="mobile-cta" href="#contact">Discuss a matter <span aria-hidden="true">↗</span></a>
+  <footer class="site-footer"><div class="shell footer-inner"><a class="footer-brand" href="#">Manheim Consulting</a><p>Source code analysis for software litigation</p><nav class="footer-links" aria-label="Legal and contact"><a href="/#contact">Contact</a><a href="/privacy.html">Privacy policy</a><a href="/terms.html">Terms and conditions</a><button type="button" data-cookie-settings hidden>Cookie settings</button></nav><span>© <span id="year">2026</span> Manheim Consulting</span></div></footer>
+  <a class="mobile-cta" href="#contact">Discuss a matter <span aria-hidden="true">→</span></a>
   <script type="module" src="./site.js"></script>
   <script type="module" src="./main.js"></script>
 </body>

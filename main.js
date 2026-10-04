@@ -46,9 +46,13 @@ form.addEventListener('submit', async (event) => {
   }
 });
 
-// The optional scene never blocks the form or readable page.
-const loadHero = () => import('./hero-scene.js')
-  .then(({ mountHero }) => mountHero(document.getElementById('hero-canvas')))
-  .catch(() => { /* Keep the static illustration visible if the scene cannot load. */ });
-if ('requestIdleCallback' in window) window.requestIdleCallback(loadHero, { timeout: 1800 });
-else window.setTimeout(loadHero, 200);
+// The hero lens is optional: the page and form never wait for it or depend on it.
+const byId = (id) => document.getElementById(id);
+const loadLens = () => import('./lens.js')
+  .then(({ mountLens }) => mountLens({
+    field: byId('lens-field'), canvas: byId('lens-canvas'), hint: byId('lens-hint'), chart: byId('lens-chart'),
+    count: byId('lens-count'), leaders: byId('lens-leaders'), grid: byId('hero-grid'), reset: byId('lens-reset'),
+  }))
+  .catch((error) => console.warn('Lens unavailable; showing the static texture.', error));
+if ('requestIdleCallback' in window) window.requestIdleCallback(loadLens, { timeout: 1200 });
+else window.setTimeout(loadLens, 200);
