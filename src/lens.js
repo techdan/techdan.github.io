@@ -150,6 +150,9 @@ export function chartAction({ found, hidden }) {
   return hidden ? 'show' : 'hide';
 }
 
+// Whether an element's highlight and leader are on show: found, and not toggled off.
+export const elementShown = ({ found, hidden }) => found && !hidden;
+
 // Fraction of the remaining distance the lens covers in dt ms: 0.035 per 60fps frame, as
 // originally, but time-based so a slow frame never slows the lens down.
 export const lensStep = dt => 1 - (1 - 0.035) ** (dt / (1000 / 60));
@@ -173,6 +176,7 @@ export function mountLens({ field, canvas, hint, chart, count, leaders, grid, re
   let curves = [], fieldOff = { left: 0, top: 0 };
   let g, dpr, mini, lx, ly, tx, ty, targetEl = null, auto = true, tour = 0, dwellMs = 0, holdUntil = 0, last = 0, idleTimer = 0, visible = true;
 
+  const isOn = el => elementShown({ found: found.has(el), hidden: hiddenLines.has(el) });
   const shown = () => FILES.map((f, i) => [f, g.xs.get(i)]).filter(([, x]) => x !== undefined);
   const row = el => chart.querySelector(`li[data-el="${el}"]`);
   const progress = el => reduce ? 1 : easeOut(Math.min(1, (performance.now() - foundAt.get(el)) / DRAW_MS));
@@ -233,7 +237,7 @@ export function mountLens({ field, canvas, hint, chart, count, leaders, grid, re
 
   // Claim chart rows are buttons: find an unfound line, or hide / redraw a found line's leader.
   function syncRow(el) {
-    row(el).setAttribute('aria-pressed', String(found.has(el) && !hiddenLines.has(el)));
+    row(el).setAttribute('aria-pressed', String(isOn(el)));
   }
   function act(el) {
     const i = FILES.findIndex(f => f.el === el), f = FILES[i], x = g && g.xs.get(i);
@@ -268,7 +272,7 @@ export function mountLens({ field, canvas, hint, chart, count, leaders, grid, re
     const defs = document.createElementNS(SVG, 'defs');
     leaders.append(defs);
     for (const [f, x] of shown()) {
-      if (!f.el || !found.has(f.el) || hiddenLines.has(f.el)) continue;
+      if (!f.el || !isOn(f.el)) continue;
       const r = row(f.el).getBoundingClientRect();
       const c = leaderCurve({ right: r.right - gr.left, top: r.top - gr.top, height: r.height }, fieldOff, f, x, g);
       const id = `lens-leader-${f.el}`, mask = document.createElementNS(SVG, 'mask');
@@ -330,7 +334,7 @@ export function mountLens({ field, canvas, hint, chart, count, leaders, grid, re
     for (const [f, x] of shown()) {
       if (lx + r < x - GUT * cw || lx - r > x + colW) continue;
       const i0 = Math.max(0, Math.floor((ly - r - HEAD) / lh)), i1 = Math.min(g.maxLines - 1, Math.ceil((ly + r - HEAD) / lh));
-      if (f.el && found.has(f.el) && f.evidence >= i0 && f.evidence <= i1) {
+      if (f.el && isOn(f.el) && f.evidence >= i0 && f.evidence <= i1) {
         ctx.fillStyle = 'rgba(243,222,79,.8)';
         ctx.fillRect(sx(x + GUT * cw) - 3, sy(lineY(g, f.evidence) + lh * .3) - lh * mag * .55, f.lines[f.evidence].length * cw * mag + 6, lh * mag * 1.1);
       }
@@ -393,7 +397,7 @@ export function mountLens({ field, canvas, hint, chart, count, leaders, grid, re
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.drawImage(mini, 0, 0);
     ctx.scale(dpr, dpr);
-    for (const [f, x] of shown()) if (f.el && found.has(f.el)) highlight(f, x);
+    for (const [f, x] of shown()) if (f.el && isOn(f.el)) highlight(f, x);
     updateLeaders();
     drawLens();
   }

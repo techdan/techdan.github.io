@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { buildCorpus, tokenize, computeLayout, overEvidence, lineY, citation, leaderCurve, evidenceTarget, underLens, chartAction, lensStep, GUT } from '../src/lens.js';
+import { buildCorpus, tokenize, computeLayout, overEvidence, lineY, citation, leaderCurve, evidenceTarget, underLens, chartAction, elementShown, lensStep, GUT } from '../src/lens.js';
 
 // Regression: when 1a was found its leader ran under the lens and vanished. The lens stopped
 // 24 characters into the cited line, so the leader's end was under the glass but outside the
@@ -35,6 +35,14 @@ test('clicking a claim chart row finds the line, then hides and redraws its lead
   assert.equal(chartAction({ found: false, hidden: false }), 'find');
   assert.equal(chartAction({ found: true, hidden: false }), 'hide');
   assert.equal(chartAction({ found: true, hidden: true }), 'show');
+});
+
+// Regression: hiding a row's line left its code highlighted. A hidden element shows neither
+// its leader nor its highlight; a found, shown element shows both.
+test('a toggled-off element shows neither its line nor its highlight', () => {
+  assert.equal(elementShown({ found: true, hidden: false }), true);
+  assert.equal(elementShown({ found: true, hidden: true }), false);
+  assert.equal(elementShown({ found: false, hidden: false }), false);
 });
 
 test('lens speed does not depend on frame rate', () => {
