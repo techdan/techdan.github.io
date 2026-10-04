@@ -131,6 +131,18 @@ export function leaderCurve(rowBox, fieldBox, file, x, g) {
   return { p0, c1: [mx, p0[1]], c2: [mx, p3[1]], p3, pathLength: 1 };
 }
 
+// Where a page point appears through the lens. The centre is a true magnifier (×mag);
+// the outer `bezel` px of the lens compress everything else it covers, ending at the
+// identity on the edge, so lines crossing the rim stay continuous instead of vanishing.
+export function lensMap(x, y, { lx, ly, R, mag, bezel }) {
+  const dx = x - lx, dy = y - ly, d = Math.hypot(dx, dy);
+  if (d === 0 || d >= R) return [x, y];
+  const inner = R - bezel, r0 = inner / mag;
+  const s = d <= r0 ? d * mag : inner + (d - r0) / (R - r0) * bezel;
+  return [lx + dx / d * s, ly + dy / d * s];
+}
+
+export const BEZEL = 18;  // px of compressing rim around the magnified centre
 const DRAW_MS = 1100; // matches the leader draw-in animation in style.css
 const COLORS = { k: '#1D3FCF', t: '#12161D', i: '#3E4752', s: '#8A5A0B', n: '#8A5A0B', c: '#8C958F', p: '#6B747E' };
 const MINI = { k: 'rgba(29,63,207,.55)', t: 'rgba(18,22,29,.55)', i: 'rgba(62,71,82,.34)', s: 'rgba(138,90,11,.45)', n: 'rgba(138,90,11,.45)', c: 'rgba(120,130,124,.3)', p: 'rgba(107,116,126,.25)' };
@@ -230,16 +242,56 @@ export function mountLens({ field, canvas, hint, chart, count, leaders, grid, re
     ctx.fillRect(x + GUT * g.cw - 2, y - g.lh * .45, f.lines[f.evidence].length * g.cw + 4, g.lh * 1.5);
     if (tag) { ctx.fillStyle = '#1D3FCF'; ctx.font = `500 9px ${MONO}`; ctx.fillText(f.el, x - 1, y + g.lh); }
   }
-  function drawLeadersMagnified(sx, sy, mag) {
+  // The rim shows the code it covers, compressed through lensMap, so highlighted lines and
+  // the leaders ending on them stay joined all the way from the page to the magnified centre.
+  function drawRim() {
+    const lens = { lx, ly, R: g.R, mag: g.mag, bezel: BEZEL }, { R, lh, cw, colW } = g;
+    const strokeAlong = (x0, x1, y) => {
+      ctx.beginPath();
+      for (let i = 0; i <= 8; i++) { const [mx, my] = lensMap(x0 + (x1 - x0) * i / 8, y, lens); if (i) ctx.lineTo(mx, my); else ctx.moveTo(mx, my); }
+      ctx.stroke();
+    };
+    ctx.lineCap = 'butt';
+    for (const [f, x] of shown()) {
+      if (lx + R < x || lx - R > x + colW + GUT * cw) continue;
+      const i0 = Math.max(0, Math.floor((ly - R - HEAD) / lh)), i1 = Math.min(g.maxLines - 1, Math.ceil((ly + R - HEAD) / lh));
+      if (f.el && found.has(f.el) && f.evidence >= i0 && f.evidence <= i1) {
+        ctx.strokeStyle = 'rgba(243,222,79,.85)'; ctx.lineWidth = 6;
+        strokeAlong(x + GUT * cw - 2, x + (GUT + f.lines[f.evidence].length) * cw + 2, lineY(g, f.evidence) + lh * .3);
+      }
+      ctx.lineWidth = 2;
+      for (let i = i0; i <= i1; i++) {
+        const y = lineY(g, i) + lh * .3;
+        for (const tk of f.toks[i]) {
+          const tx = x + (GUT + tk.x) * cw;
+          ctx.strokeStyle = MINI[tk.k];
+          strokeAlong(tx, tx + Math.max(cw * tk.t.length - cw * .3, cw * .6), y);
+        }
+      }
+    }
+  }
+
+  // Leaders under the lens are drawn through lensMap: magnified in the centre and
+  // compressed through the rim, meeting the unmasked SVG exactly at the lens edge.
+  function drawLeadersThroughLens() {
     const now = performance.now(), ox = fieldOff.left, oy = fieldOff.top;
-    const X = v => sx(v - ox), Y = v => sy(v - oy);
-    ctx.strokeStyle = '#1D3FCF'; ctx.fillStyle = '#1D3FCF'; ctx.lineWidth = Math.min(mag, 3);
+    const lens = { lx, ly, R: g.R, mag: g.mag, bezel: BEZEL };
+    const map = (px, py) => lensMap(px - ox, py - oy, lens);
+    ctx.strokeStyle = '#1D3FCF'; ctx.fillStyle = '#1D3FCF'; ctx.lineWidth = 2;
     for (const { c, el } of curves) {
       if (now - foundAt.get(el) < DRAW_MS) continue; // still drawing in; appears once complete
-      ctx.beginPath(); ctx.moveTo(X(c.p0[0]), Y(c.p0[1]));
-      ctx.bezierCurveTo(X(c.c1[0]), Y(c.c1[1]), X(c.c2[0]), Y(c.c2[1]), X(c.p3[0]), Y(c.p3[1]));
+      ctx.beginPath();
+      for (let i = 0; i <= 160; i++) {
+        const t = i / 160, u = 1 - t;
+        const bx = u * u * u * c.p0[0] + 3 * u * u * t * c.c1[0] + 3 * u * t * t * c.c2[0] + t * t * t * c.p3[0];
+        const by = u * u * u * c.p0[1] + 3 * u * u * t * c.c1[1] + 3 * u * t * t * c.c2[1] + t * t * t * c.p3[1];
+        const [mx, my] = map(bx, by);
+        if (i) ctx.lineTo(mx, my); else ctx.moveTo(mx, my);
+      }
       ctx.stroke();
-      ctx.beginPath(); ctx.arc(X(c.p3[0]), Y(c.p3[1]), Math.min(2.5 * mag, 7), 0, Math.PI * 2); ctx.fill();
+      const [ex, ey] = map(c.p3[0], c.p3[1]);
+      const inCentre = Math.hypot(c.p3[0] - ox - lx, c.p3[1] - oy - ly) <= (g.R - BEZEL) / g.mag;
+      ctx.beginPath(); ctx.arc(ex, ey, inCentre ? Math.min(2.5 * g.mag, 7) : 2.5, 0, Math.PI * 2); ctx.fill();
     }
   }
   function drawLens() {
@@ -248,14 +300,15 @@ export function mountLens({ field, canvas, hint, chart, count, leaders, grid, re
     ctx.shadowColor = 'rgba(18,22,29,.22)'; ctx.shadowBlur = 24; ctx.shadowOffsetY = 8;
     ctx.beginPath(); ctx.arc(lx, ly, R, 0, Math.PI * 2); ctx.fillStyle = '#FBFBF9'; ctx.fill();
     ctx.restore();
+    const inner = R - BEZEL;
+    ctx.beginPath(); ctx.arc(lx, ly, R, 0, Math.PI * 2); ctx.arc(lx, ly, inner, 0, Math.PI * 2, true); ctx.fillStyle = '#EEF0EA'; ctx.fill();
     ctx.save();
-    ctx.beginPath(); ctx.arc(lx, ly, R, 0, Math.PI * 2); ctx.clip();
+    ctx.beginPath(); ctx.arc(lx, ly, inner, 0, Math.PI * 2); ctx.clip();
     // Text is drawn in screen space at a readable size: browsers clamp tiny canvas
     // fonts, so scaling a 2px font up would render far too large.
-    const r = R / mag, sx = v => lx + (v - lx) * mag, sy = v => ly + (v - ly) * mag;
+    const r = inner / mag, sx = v => lx + (v - lx) * mag, sy = v => ly + (v - ly) * mag;
     ctx.font = `400 ${(cw / 0.6) * mag}px ${MONO}`; ctx.textBaseline = 'middle';
     let under = null;
-    drawLeadersMagnified(sx, sy, mag);
     for (const [f, x] of shown()) {
       if (lx + r < x - GUT * cw || lx - r > x + colW) continue;
       const i0 = Math.max(0, Math.floor((ly - r - HEAD) / lh)), i1 = Math.min(g.maxLines - 1, Math.ceil((ly + r - HEAD) / lh));
@@ -270,6 +323,16 @@ export function mountLens({ field, canvas, hint, chart, count, leaders, grid, re
         if (Math.abs(lineY(g, i) + lh * .3 - ly) < lh * .5 && lx > x - 4 && lx < x + colW) under = `${f.name}:${f.start + i}`;
       }
     }
+    ctx.restore();
+    ctx.strokeStyle = 'rgba(18,22,29,.12)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(lx, ly, inner, 0, Math.PI * 2); ctx.stroke();
+    ctx.save();
+    ctx.beginPath(); ctx.arc(lx, ly, R, 0, Math.PI * 2); ctx.arc(lx, ly, inner, 0, Math.PI * 2, true); ctx.clip();
+    drawRim();
+    ctx.restore();
+    ctx.save();
+    ctx.beginPath(); ctx.arc(lx, ly, R, 0, Math.PI * 2); ctx.clip();
+    drawLeadersThroughLens();
     ctx.restore();
     ctx.strokeStyle = '#12161D'; ctx.lineWidth = 1.5;
     ctx.beginPath(); ctx.arc(lx, ly, R, 0, Math.PI * 2); ctx.stroke();
@@ -299,7 +362,7 @@ export function mountLens({ field, canvas, hint, chart, count, leaders, grid, re
     drawLens();
     leaders.style.setProperty('--lx', `${fieldOff.left + lx}px`);
     leaders.style.setProperty('--ly', `${fieldOff.top + ly}px`);
-    leaders.style.setProperty('--lr', `${g.R + 6}px`);
+    leaders.style.setProperty('--lr', `${g.R}px`);
   }
 
   const toLocal = e => { const r = field.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };

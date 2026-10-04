@@ -1,6 +1,28 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { buildCorpus, tokenize, computeLayout, overEvidence, lineY, citation, leaderCurve, GUT } from '../src/lens.js';
+import { buildCorpus, tokenize, computeLayout, overEvidence, lineY, citation, leaderCurve, lensMap, GUT } from '../src/lens.js';
+
+// Regression: a leader ending under the lens looked broken. A plain magnifier shows only
+// the centre R/mag of what it covers; anything between R/mag and R was hidden, so the
+// outside line stopped at the rim and its magnified copy appeared elsewhere. lensMap must
+// be continuous: linear in the centre, compressing in the rim, identity at the edge.
+test('the lens mapping magnifies the centre and joins the page seamlessly at the rim', () => {
+  const lens = { lx: 300, ly: 200, R: 112, mag: 4.4, bezel: 18 };
+  const at = (dx, dy) => lensMap(lens.lx + dx, lens.ly + dy, lens);
+  const r0 = (lens.R - lens.bezel) / lens.mag;
+  // centre: exact linear magnification, so leaders line up with the magnified code
+  assert.deepEqual(at(5, -3).map(v => +v.toFixed(6)), [lens.lx + 5 * lens.mag, lens.ly - 3 * lens.mag]);
+  // inner edge of the rim
+  const [ix] = at(r0, 0); assert.ok(Math.abs(ix - (lens.lx + lens.R - lens.bezel)) < 1e-9);
+  // outer edge: a point on the rim stays put, so the line outside meets the line inside
+  for (const a of [0, 1, 2, 3, 4, 5]) {
+    const dx = Math.cos(a) * lens.R, dy = Math.sin(a) * lens.R, [x, y] = at(dx, dy);
+    assert.ok(Math.hypot(x - lens.lx - dx, y - lens.ly - dy) < 1e-9);
+  }
+  // monotonic along a ray: nothing folds over or disappears
+  let prev = -1;
+  for (let d = 0; d <= lens.R; d += 0.5) { const [x] = at(d, 0); assert.ok(x - lens.lx > prev); prev = x - lens.lx; }
+});
 
 // Regression: the 1b leader stopped short with no end dot. The draw-in animation
 // used a fixed 600px dash, so any curve longer than 600px was cut off. Leaders must
