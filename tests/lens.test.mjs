@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { buildCorpus, tokenize, computeLayout, overEvidence, lineY, citation, leaderCurve, evidenceTarget, magnifiedWeight, lensStep, GUT } from '../src/lens.js';
+import { buildCorpus, tokenize, computeLayout, overEvidence, lineY, citation, leaderCurve, evidenceTarget, underLens, lensStep, GUT } from '../src/lens.js';
 
 // Regression: when 1a was found its leader ran under the lens and vanished. The lens stopped
 // 24 characters into the cited line, so the leader's end was under the glass but outside the
@@ -19,14 +19,16 @@ test('a found line is shown with its leader end inside the magnified view', () =
   }
 });
 
-test('the magnified leader fades smoothly as its end leaves the lens view', () => {
-  const view = 25;
-  assert.equal(magnifiedWeight(0, view), 1);
-  assert.equal(magnifiedWeight(0.6 * view, view), 1);
-  assert.equal(magnifiedWeight(view, view), 0);
-  assert.equal(magnifiedWeight(3 * view, view), 0);
-  let prev = 1;
-  for (let d = 0; d <= view; d += 0.25) { const w = magnifiedWeight(d, view); assert.ok(w <= prev && prev - w < 0.05); prev = w; }
+// Regression: a leader crossing the lens was drawn at normal size over the glass whenever its
+// end was away from the lens centre. Any leader passing under the lens must be magnified there.
+test('every leader that passes under the lens is magnified, wherever its end is', () => {
+  const lens = { lx: 300, ly: 200, R: 112 };
+  const across = { pts: [[100, 210], [300, 205], [500, 190]] };   // crosses the centre, ends far away
+  const grazing = { pts: [[150, 400], [250, 300], [395, 260]] };   // last sample just inside the rim
+  const clear = { pts: [[100, 500], [300, 480], [500, 470]] };     // never under the lens
+  assert.equal(underLens(across, lens), true);
+  assert.equal(underLens(grazing, lens), true);
+  assert.equal(underLens(clear, lens), false);
 });
 
 test('lens speed does not depend on frame rate', () => {

@@ -137,12 +137,10 @@ export function evidenceTarget(file, x, g) {
   return { x: x + (GUT + 1) * g.cw, y: lineY(g, file.evidence) + g.lh * .3 };
 }
 
-// How strongly a leader is shown magnified inside the lens (1) versus as the plain line
-// over it (0), from the distance of its end to the lens centre. `view` is the radius of
-// page the lens shows (R / mag). Smooth, so the hand-off never jumps.
-export function magnifiedWeight(d, view) {
-  const t = Math.min(1, Math.max(0, (view - d) / (0.4 * view)));
-  return t * t * (3 - 2 * t);
+// Does any part of this leader (sampled points, field coordinates) pass under the lens?
+// If so, the plain line is hidden there and the lens shows it magnified, like the code.
+export function underLens(curve, { lx, ly, R }) {
+  return curve.pts.some(([x, y]) => Math.hypot(x - lx, y - ly) < R + 2);
 }
 
 // Fraction of the remaining distance the lens covers in dt ms: 0.035 per 60fps frame, as
@@ -226,7 +224,7 @@ export function mountLens({ field, canvas, hint, chart, count, leaders, grid, re
   }
 
   // Leaders: SVG lines from the claim chart to the code. Each has its own mask so that,
-  // while its end is in the lens view, the plain line is hidden under the lens and the
+  // wherever it passes under the lens, the plain line is hidden there and the
   // canvas draws it magnified instead (drawLens). The draw-in is driven per frame so the
   // SVG part and the magnified part always show the same progress.
   function placeLeaders() {
@@ -269,10 +267,9 @@ export function mountLens({ field, canvas, hint, chart, count, leaders, grid, re
     }
   }
   function updateLeaders() {
-    const view = g.R / g.mag;
     for (const cv of curves) {
-      const p = progress(cv.el), end = cv.pts[cv.pts.length - 1];
-      cv.weight = magnifiedWeight(Math.hypot(end[0] - lx, end[1] - ly), view);
+      const p = progress(cv.el);
+      cv.weight = underLens(cv, { lx, ly, R: g.R }) ? 1 : 0;
       cv.path.style.strokeDashoffset = 1 - p;
       cv.dot.style.opacity = p >= 1 ? 1 : 0;
       cv.hole.setAttribute('cx', fieldOff.left + lx); cv.hole.setAttribute('cy', fieldOff.top + ly);
@@ -313,7 +310,7 @@ export function mountLens({ field, canvas, hint, chart, count, leaders, grid, re
         if (Math.abs(lineY(g, i) + lh * .3 - ly) < lh * .5 && lx > x - 4 && lx < x + colW) under = `${f.name}:${f.start + i}`;
       }
     }
-    // Leaders whose end is in view: drawn magnified, as far as they have drawn in.
+    // Leaders under the lens: drawn magnified, as far as they have drawn in.
     ctx.strokeStyle = '#1D3FCF'; ctx.fillStyle = '#1D3FCF'; ctx.lineWidth = 2; ctx.lineCap = 'round';
     for (const cv of curves) {
       if (cv.weight <= 0) continue;
