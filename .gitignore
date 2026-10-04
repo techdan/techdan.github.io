@@ -4,3 +4,5 @@ scripts/*
 !scripts/build.bat
 !scripts/build-static.mjs
 !scripts/build-pages.mjs
+!scripts/social-preview.html
+!scripts/render-social-preview.mjs

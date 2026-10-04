@@ -1,6 +1,23 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { buildCorpus, tokenize, computeLayout, overEvidence, lineY, citation, GUT } from '../src/lens.js';
+import { buildCorpus, tokenize, computeLayout, overEvidence, lineY, citation, leaderCurve, GUT } from '../src/lens.js';
+
+// Regression: the 1b leader stopped short with no end dot. The draw-in animation
+// used a fixed 600px dash, so any curve longer than 600px was cut off. Leaders must
+// use a normalised path length so the dash always covers the whole curve.
+test('leader curves run from the claim row to the start of the cited line, at any length', () => {
+  const g = computeLayout(760, 640), files = buildCorpus();
+  const row = { right: 420, top: 900, height: 40 };            // far from the field: a long curve
+  const field = { left: 480, top: 100 };
+  files.forEach((f, i) => {
+    if (!f.el) return;
+    const x = g.xs.get(i), c = leaderCurve(row, field, f, x, g);
+    assert.deepEqual(c.p0, [row.right, row.top + row.height / 2]);
+    assert.equal(c.p3[0], field.left + x + GUT * g.cw - 4);
+    assert.equal(c.p3[1], field.top + lineY(g, f.evidence) + g.lh * .3);
+    assert.equal(c.pathLength, 1, 'dash animation is normalised, never truncated');
+  });
+});
 
 test('the example corpus is deterministic and cites the three claim lines', () => {
   const a = buildCorpus(), b = buildCorpus();

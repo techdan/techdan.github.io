@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "build-static": "node scripts/build-static.mjs",
     "test": "node --test tests/*.test.mjs",
-    "build-css": "tailwindcss -i ./src/style.css -o ./style.css --minify"
+    "build-css": "tailwindcss -i ./src/style.css -o ./style.css --minify",
+    "social-preview": "node scripts/render-social-preview.mjs"
   },
   "devDependencies": {
     "@fontsource-variable/newsreader": "^5.3.0",

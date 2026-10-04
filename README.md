@@ -39,6 +39,8 @@ Tests mock the provider. They do not send email or verify inbox delivery. Before
 
 `src/lens.js` draws a minimap of example source files with a magnifier that finds the three lines supporting an example claim chart (the code and claim are illustrative, and labeled as such on the page). Its pure parts (example corpus, tokenizer, layout, hit test) are covered by `tests/lens.test.mjs`. The field re-measures itself with a `ResizeObserver` and waits until it has a real size before drawing, so a page opened in a background tab or a hidden frame still starts correctly. Without JavaScript the field shows a static code texture. Reduced-motion users get the finished chart without the moving lens. Rendering pauses offscreen.
 
+The link-sharing image `assets/social-preview.png` (1200×630) is drawn by `scripts/social-preview.html` using the same example code as the hero. After design changes, run `npm run social-preview` (needs Chrome or Edge; set `CHROME_PATH` if neither is in the usual place).
+
 Fonts (Newsreader, Public Sans, IBM Plex Mono) are self-hosted from `@fontsource` packages; `npm run build-static` copies them into `assets/fonts` with their OFL licenses.
 
 The company-name strip describes whose software has been analyzed; it is not a client or endorsement list. The experience figures and service descriptions use the supplied business facts. Detailed service pages, additional credentials, approved case studies, analytics, and Search Console setup can be added later.

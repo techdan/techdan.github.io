@@ -121,6 +121,17 @@ export function overEvidence(lx, ly, file, x, g) {
   return Math.abs(ly - y) < g.R * .28 && lx > x - g.R * .2 && lx < x + g.colW * .8;
 }
 
+// Leader from a claim-chart row to the start of the cited line, as a cubic Bézier.
+// rowBox and fieldBox share one origin (the hero grid). pathLength 1 normalises the
+// draw-in dash so long curves are never cut short.
+export function leaderCurve(rowBox, fieldBox, file, x, g) {
+  const p0 = [rowBox.right, rowBox.top + rowBox.height / 2];
+  const p3 = [fieldBox.left + x + GUT * g.cw - 4, fieldBox.top + lineY(g, file.evidence) + g.lh * .3];
+  const mx = (p0[0] + p3[0]) / 2;
+  return { p0, c1: [mx, p0[1]], c2: [mx, p3[1]], p3, pathLength: 1 };
+}
+
+const DRAW_MS = 1100; // matches the leader draw-in animation in style.css
 const COLORS = { k: '#1D3FCF', t: '#12161D', i: '#3E4752', s: '#8A5A0B', n: '#8A5A0B', c: '#8C958F', p: '#6B747E' };
 const MINI = { k: 'rgba(29,63,207,.55)', t: 'rgba(18,22,29,.55)', i: 'rgba(62,71,82,.34)', s: 'rgba(138,90,11,.45)', n: 'rgba(138,90,11,.45)', c: 'rgba(120,130,124,.3)', p: 'rgba(107,116,126,.25)' };
 const MONO = '"IBM Plex Mono", ui-monospace, Consolas, monospace';
@@ -131,7 +142,8 @@ export function mountLens({ field, canvas, hint, chart, count, leaders, grid, re
   const FILES = buildCorpus();
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const rnd = createRandom(31), pick = a => a[Math.floor(rnd() * a.length)];
-  const found = new Set();
+  const found = new Set(), foundAt = new Map();
+  let curves = [], fieldOff = { left: 0, top: 0 };
   let g, dpr, mini, lx, ly, tx, ty, auto = true, tour = 0, dwell = 0, idleTimer = 0, visible = true;
 
   const shown = () => FILES.map((f, i) => [f, g.xs.get(i)]).filter(([, x]) => x !== undefined);
@@ -180,25 +192,34 @@ export function mountLens({ field, canvas, hint, chart, count, leaders, grid, re
     return { x: x + rnd() * g.colW, y: HEAD + rnd() * (g.H - HEAD - 30) };
   }
   function mark(f) {
-    found.add(f.el);
+    found.add(f.el); foundAt.set(f.el, performance.now());
     const li = row(f.el);
     li.classList.add('found');
     li.querySelector('.cite').textContent = citation(f);
     count.textContent = found.size === 3 ? 'All elements located' : `${found.size} / 3 located`;
     placeLeaders();
   }
+  // SVG leaders join the chart to the field. Their part under the lens is masked out
+  // and redrawn magnified on the canvas (see drawLens), so the lens magnifies them too.
   function placeLeaders() {
-    leaders.replaceChildren();
-    if (getComputedStyle(leaders).display === 'none' || !g) return;
+    leaders.replaceChildren(); curves = [];
+    if (!g) return;
     const gr = grid.getBoundingClientRect(), fr = field.getBoundingClientRect();
+    fieldOff = { left: fr.left - gr.left, top: fr.top - gr.top };
+    if (getComputedStyle(leaders).display === 'none') return;
+    const ns = 'http://www.w3.org/2000/svg', now = performance.now();
     for (const [f, x] of shown()) {
       if (!f.el || !found.has(f.el)) continue;
       const r = row(f.el).getBoundingClientRect();
-      const x1 = r.right - gr.left, y1 = r.top + r.height / 2 - gr.top;
-      const x2 = fr.left - gr.left + x + GUT * g.cw - 4, y2 = fr.top - gr.top + lineY(g, f.evidence) + g.lh * .3;
-      const mx = (x1 + x2) / 2, ns = 'http://www.w3.org/2000/svg';
-      const path = document.createElementNS(ns, 'path'); path.setAttribute('d', `M${x1} ${y1} C ${mx} ${y1}, ${mx} ${y2}, ${x2} ${y2}`);
-      const dot = document.createElementNS(ns, 'circle'); dot.setAttribute('cx', x2); dot.setAttribute('cy', y2); dot.setAttribute('r', 2.5);
+      const c = leaderCurve({ right: r.right - gr.left, top: r.top - gr.top, height: r.height }, fieldOff, f, x, g);
+      curves.push({ c, el: f.el });
+      const path = document.createElementNS(ns, 'path');
+      path.setAttribute('d', `M${c.p0} C ${c.c1}, ${c.c2}, ${c.p3}`);
+      path.setAttribute('pathLength', c.pathLength);
+      const dot = document.createElementNS(ns, 'circle');
+      dot.setAttribute('cx', c.p3[0]); dot.setAttribute('cy', c.p3[1]); dot.setAttribute('r', 2.5);
+      // Re-placed after a resize: show already-drawn leaders without replaying the animation.
+      if (now - foundAt.get(f.el) > DRAW_MS) { path.classList.add('drawn'); dot.classList.add('drawn'); }
       leaders.append(path, dot);
     }
   }
@@ -208,6 +229,18 @@ export function mountLens({ field, canvas, hint, chart, count, leaders, grid, re
     ctx.fillStyle = 'rgba(243,222,79,.85)';
     ctx.fillRect(x + GUT * g.cw - 2, y - g.lh * .45, f.lines[f.evidence].length * g.cw + 4, g.lh * 1.5);
     if (tag) { ctx.fillStyle = '#1D3FCF'; ctx.font = `500 9px ${MONO}`; ctx.fillText(f.el, x - 1, y + g.lh); }
+  }
+  function drawLeadersMagnified(sx, sy, mag) {
+    const now = performance.now(), ox = fieldOff.left, oy = fieldOff.top;
+    const X = v => sx(v - ox), Y = v => sy(v - oy);
+    ctx.strokeStyle = '#1D3FCF'; ctx.fillStyle = '#1D3FCF'; ctx.lineWidth = Math.min(mag, 3);
+    for (const { c, el } of curves) {
+      if (now - foundAt.get(el) < DRAW_MS) continue; // still drawing in; appears once complete
+      ctx.beginPath(); ctx.moveTo(X(c.p0[0]), Y(c.p0[1]));
+      ctx.bezierCurveTo(X(c.c1[0]), Y(c.c1[1]), X(c.c2[0]), Y(c.c2[1]), X(c.p3[0]), Y(c.p3[1]));
+      ctx.stroke();
+      ctx.beginPath(); ctx.arc(X(c.p3[0]), Y(c.p3[1]), Math.min(2.5 * mag, 7), 0, Math.PI * 2); ctx.fill();
+    }
   }
   function drawLens() {
     const { R, mag, lh, cw, colW } = g;
@@ -222,6 +255,7 @@ export function mountLens({ field, canvas, hint, chart, count, leaders, grid, re
     const r = R / mag, sx = v => lx + (v - lx) * mag, sy = v => ly + (v - ly) * mag;
     ctx.font = `400 ${(cw / 0.6) * mag}px ${MONO}`; ctx.textBaseline = 'middle';
     let under = null;
+    drawLeadersMagnified(sx, sy, mag);
     for (const [f, x] of shown()) {
       if (lx + r < x - GUT * cw || lx - r > x + colW) continue;
       const i0 = Math.max(0, Math.floor((ly - r - HEAD) / lh)), i1 = Math.min(g.maxLines - 1, Math.ceil((ly + r - HEAD) / lh));
@@ -263,6 +297,9 @@ export function mountLens({ field, canvas, hint, chart, count, leaders, grid, re
     for (const [f, x] of shown()) if (f.el && found.has(f.el)) highlight(f, x, true);
     for (const [f, x] of shown()) if (!found.has(f.el) && overEvidence(lx, ly, f, x, g)) mark(f);
     drawLens();
+    leaders.style.setProperty('--lx', `${fieldOff.left + lx}px`);
+    leaders.style.setProperty('--ly', `${fieldOff.top + ly}px`);
+    leaders.style.setProperty('--lr', `${g.R + 6}px`);
   }
 
   const toLocal = e => { const r = field.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
@@ -279,11 +316,14 @@ export function mountLens({ field, canvas, hint, chart, count, leaders, grid, re
   });
   let resizeTimer;
   const relayout = () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(layout, 80); };
-  if ('ResizeObserver' in window) new ResizeObserver(relayout).observe(field);
+  if ('ResizeObserver' in window) {
+    new ResizeObserver(relayout).observe(field);
+    new ResizeObserver(() => placeLeaders()).observe(chart); // rows move as fonts load or text wraps
+  }
   else addEventListener('resize', relayout);
   if ('IntersectionObserver' in window) new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; }).observe(field);
   // File labels and lens text use the mono face; redraw once it has loaded.
-  document.fonts?.ready.then(() => { if (g) drawMini(); });
+  document.fonts?.ready.then(() => { if (g) { drawMini(); placeLeaders(); } });
 
   layout();
   requestAnimationFrame(frame);
