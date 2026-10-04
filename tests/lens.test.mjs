@@ -1,27 +1,38 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { buildCorpus, tokenize, computeLayout, overEvidence, lineY, citation, leaderCurve, lensMap, GUT } from '../src/lens.js';
+import { buildCorpus, tokenize, computeLayout, overEvidence, lineY, citation, leaderCurve, evidenceTarget, magnifiedWeight, lensStep, GUT } from '../src/lens.js';
 
-// Regression: a leader ending under the lens looked broken. A plain magnifier shows only
-// the centre R/mag of what it covers; anything between R/mag and R was hidden, so the
-// outside line stopped at the rim and its magnified copy appeared elsewhere. lensMap must
-// be continuous: linear in the centre, compressing in the rim, identity at the edge.
-test('the lens mapping magnifies the centre and joins the page seamlessly at the rim', () => {
-  const lens = { lx: 300, ly: 200, R: 112, mag: 4.4, bezel: 18 };
-  const at = (dx, dy) => lensMap(lens.lx + dx, lens.ly + dy, lens);
-  const r0 = (lens.R - lens.bezel) / lens.mag;
-  // centre: exact linear magnification, so leaders line up with the magnified code
-  assert.deepEqual(at(5, -3).map(v => +v.toFixed(6)), [lens.lx + 5 * lens.mag, lens.ly - 3 * lens.mag]);
-  // inner edge of the rim
-  const [ix] = at(r0, 0); assert.ok(Math.abs(ix - (lens.lx + lens.R - lens.bezel)) < 1e-9);
-  // outer edge: a point on the rim stays put, so the line outside meets the line inside
-  for (const a of [0, 1, 2, 3, 4, 5]) {
-    const dx = Math.cos(a) * lens.R, dy = Math.sin(a) * lens.R, [x, y] = at(dx, dy);
-    assert.ok(Math.hypot(x - lens.lx - dx, y - lens.ly - dy) < 1e-9);
+// Regression: when 1a was found its leader ran under the lens and vanished. The lens stopped
+// 24 characters into the cited line, so the leader's end was under the glass but outside the
+// magnified view. The lens must stop where the leader's end is well inside that view.
+test('a found line is shown with its leader end inside the magnified view', () => {
+  const files = buildCorpus();
+  for (const [w, h] of [[720, 560], [1000, 640], [1200, 640]]) {
+    const g = computeLayout(w, h);
+    files.forEach((f, i) => {
+      if (!f.el || !g.xs.has(i)) return;
+      const x = g.xs.get(i), t = evidenceTarget(f, x, g);
+      const end = leaderCurve({ right: 0, top: 0, height: 0 }, { left: 0, top: 0 }, f, x, g).p3;
+      assert.ok(Math.hypot(end[0] - t.x, end[1] - t.y) < 0.6 * g.R / g.mag, `${f.name} at ${w}px`);
+      assert.ok(overEvidence(t.x, t.y, f, x, g), 'arriving there counts as finding the line');
+    });
   }
-  // monotonic along a ray: nothing folds over or disappears
-  let prev = -1;
-  for (let d = 0; d <= lens.R; d += 0.5) { const [x] = at(d, 0); assert.ok(x - lens.lx > prev); prev = x - lens.lx; }
+});
+
+test('the magnified leader fades smoothly as its end leaves the lens view', () => {
+  const view = 25;
+  assert.equal(magnifiedWeight(0, view), 1);
+  assert.equal(magnifiedWeight(0.6 * view, view), 1);
+  assert.equal(magnifiedWeight(view, view), 0);
+  assert.equal(magnifiedWeight(3 * view, view), 0);
+  let prev = 1;
+  for (let d = 0; d <= view; d += 0.25) { const w = magnifiedWeight(d, view); assert.ok(w <= prev && prev - w < 0.05); prev = w; }
+});
+
+test('lens speed does not depend on frame rate', () => {
+  const one = lensStep(1000 / 60), two = 1 - (1 - lensStep(500 / 60)) ** 2;
+  assert.ok(Math.abs(one - 0.035) < 1e-9, 'matches the original per-frame speed at 60fps');
+  assert.ok(Math.abs(one - two) < 1e-9, 'two half frames move as far as one full frame');
 });
 
 // Regression: the 1b leader stopped short with no end dot. The draw-in animation
